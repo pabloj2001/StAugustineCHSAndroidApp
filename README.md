@@ -1,5 +1,5 @@
 # StAugustineCHSAndroidApp
-The Repository for the St. Augustine CHS Android Version of the App
+The Repository for the St. Augustine CHS Android Version of the App.
 
 # Structure
 The real folder structure is not like the one here on GitHub. Once downloaded, the files in this repository should be arranged like so before working with them:
