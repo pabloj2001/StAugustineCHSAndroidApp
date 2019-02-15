@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="@dimen/loadingCirclePadding"
+                android:id="@+id/cmlLoadingCircle"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:id="@+id/cmlMembersGroup">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Admins"
+                    android:textSize="24sp"
+                    android:textColor="@color/colorPrimary"
+                    android:paddingTop="8dp"
+                    android:textAlignment="center"
+                    android:id="@+id/cmlAdminText"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:id="@+id/cmlAdminList"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Members"
+                    android:textSize="24sp"
+                    android:textColor="@color/colorPrimary"
+                    android:paddingTop="8dp"
+                    android:textAlignment="center"
+                    android:id="@+id/cmlMemberText"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="NO PENDING MEMBERS AT THIS TIME"
+                    android:textSize="18sp"
+                    android:paddingTop="8dp"
+                    android:textAlignment="center"
+                    android:visibility="gone"
+                    android:id="@+id/cmlPendingError"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:id="@+id/cmlMemberList"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</LinearLayout>

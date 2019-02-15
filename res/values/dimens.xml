@@ -1,0 +1,23 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="nav_header_vertical_spacing">16dp</dimen>
+    <dimen name="nav_header_height">170dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="loadingCirclePadding">100dp</dimen>
+
+    <dimen name="icon_width">20dp</dimen>
+    <dimen name="icon_width_select">30dp</dimen>
+    <dimen name="icon_width_big">150dp</dimen>
+    <dimen name="img_height">300dp</dimen>
+    <dimen name="badge_size">80dp</dimen>
+
+    <dimen name="icon_select_size">480px</dimen>
+    <dimen name="icon_size">320px</dimen>
+    <dimen name="icon_small_size">180px</dimen>
+    <dimen name="banner_width">1280px</dimen>
+    <dimen name="banner_height">720px</dimen>
+    <dimen name="icon_big_size">600px</dimen>
+    <dimen name="tag_size">1000px</dimen>
+</resources>

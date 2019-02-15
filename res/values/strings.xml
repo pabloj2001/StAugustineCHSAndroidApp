@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">St. Augustine CHS</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="newsSiteUrl">http://www.staugustinechs.ca/printable</string>
+    <string name="signInMessage">SIGN IN WITH YOUR YCDSB ACCOUNT TO CONTINUE</string>
+    <string name="scriptId">M4mEiRp5y5-lCa01NFoeSIAExKb2sehiP</string>
+    <string name="web_client_id">448336593725-o8h11bnj9kh32lc8kk6pvgdeknfj3it2.apps.googleusercontent.com</string>
+    <string name="default_notification_channel_id">DEFAULT_NOTIFICATION_IDBLEH</string>
+</resources>
