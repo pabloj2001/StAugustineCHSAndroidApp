@@ -106,17 +106,20 @@ public class Main extends AppCompatActivity
     private void init(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-                //GO TO LOGIN ACTIVITY
+                //THE USER ISN'T SIGNED INTO FIREBASE, GO TO LOGIN ACTIVITY
                 Intent intent = new Intent(this, Login.class);
                 startActivity(intent);
                 finish();
             } else if (AppUtils.shouldGetFile(FirebaseAuth.getInstance().getUid() + SignUp.SIGNUP_FILE,
                     this)) {
-                //GO TO SIGN UP ACTIVITY
+                //IF THE USER IS SIGNED IN BUT HASN'T COMPLETED SIGNING UP
+                //(THE FILE SAYING THEY HAVE SIGNED UP DOESN'T EXIST AND/OR THEY DON'T HAVE
+                //A USER DOCUMENT IN FIRESTORE), GO TO THE SIGN UP ACTIVITY
                 Intent intent = new Intent(this, SignUp.class);
                 startActivity(intent);
                 finish();
             } else {
+                //SET THE MAIN ACTIVITY LAYOUT
                 setContentView(R.layout.activity_home);
 
                 //SET CRASHLYTICS IDENTIFIER
@@ -167,6 +170,7 @@ public class Main extends AppCompatActivity
                     navigationView.setCheckedItem(R.id.nav_home);
                     navigationView.setNavigationItemSelectedListener(this);
 
+                    //UPDATE APP COLORS
                     this.updateColors();
 
                     try {
@@ -199,6 +203,7 @@ public class Main extends AppCompatActivity
                         e.printStackTrace();
                     }
                 } else {
+                    //WE HAVE MANUALLY SHUT DOWN THE APP FROM RC, DON'T LET THE USER IN.
                     toolbar.setTitle("APP CURRENTLY OFFLINE");
                     LinearLayout layout = findViewById(R.id.mainLayout);
                     layout.removeView(findViewById(R.id.main_fragment_container));
@@ -226,6 +231,7 @@ public class Main extends AppCompatActivity
     }
 
     public void refreshProfile() {
+        //GET THE USER DATA. WILL CALL OUR updateProfile METHOD WHEN DONE
         userTask = new GetUserTask(this,
                 Arrays.asList(FirebaseAuth.getInstance().getUid()), true);
         userTask.execute();
@@ -235,9 +241,11 @@ public class Main extends AppCompatActivity
     public void updateProfile(List<UserProfile> users) {
         if (users != null && !users.isEmpty() && users.get(0) != null
                 && users.get(0).getIcon().getImg() != null) {
+            //SAVE THE USER AND UPDATE THE DRAWER
             Main.PROFILE = users.get(0);
             updateUserInfo();
 
+            //REFRESH THE HOME PAGE ANNOUNCEMENTS
             homeFragment.refreshAnnouns();
 
            /* if (Main.REGISTER_TOKEN) {
@@ -256,29 +264,37 @@ public class Main extends AppCompatActivity
                         });
             }*/
         } else {
+            //WE COULDN'T GET THE USER'S DOCUMENT SO THE DATABASE
+            //MUST BE UNREACHABLE AT THE MOMENT (PROBABLY THE DEVICE IS OFFLINE)
             homeFragment.setOffline();
         }
     }
 
     private void updateUserInfo() {
+        //SET THE USER'S PROFILE PICTURE IN THE DRAWER
         ImageView profilePic = (ImageView) findViewById(R.id.nav_profilePic);
         int px = AppUtils.getDeviceDimen(R.dimen.icon_size, this);
         profilePic.setImageBitmap(Bitmap.createScaledBitmap(Main.PROFILE.getIcon().getImg(), px, px, false));
 
+        //SET THE USER'S NAME IN THE DRAWER
         TextView name = (TextView) findViewById(R.id.nav_studentName);
         name.setText(Main.PROFILE.getName());
 
+        //SET THE USER'S EMAIL IN THE DRAWER
         TextView email = (TextView) findViewById(R.id.nav_grade);
         email.setText(Main.PROFILE.getEmail().substring(0, Main.PROFILE.getEmail().indexOf("@")));
 
+        //ALLOW THE TOP SECTION OF THE DRAWER TO BE CLICKABLE
         View navGroup = findViewById(R.id.navGroup);
         navGroup.setOnClickListener(this);
 
+        //UNLOCK THE DRAWER SO THAT USER CAN OPEN IT
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
     }
 
     @Override
     public void updateIcons(List<ProfileIcon> icons) {
+        //SET THE USER'S ICON
         Main.PROFILE.setLocalIcon(icons.get(0));
         updateUserInfo();
     }
@@ -286,6 +302,7 @@ public class Main extends AppCompatActivity
     @Override
     public void onBackPressed() {
         if(drawer != null){
+            //ON BACK PRESSED, CLOSE THE DRAWER IF IT IS OPEN
             if (drawer.isDrawerOpen(GravityCompat.START)) {
                 drawer.closeDrawer(GravityCompat.START);
                 return;
