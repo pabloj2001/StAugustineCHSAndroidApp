@@ -75,10 +75,23 @@
                 android:visibility="gone"
                 android:id="@+id/homeTopSong"/>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="21sp"
+                android:textAlignment="center"
+                android:text="COULDN'T LOAD SCHOOL ANNOUNCEMENTS"
+                android:paddingTop="12dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:visibility="gone"
+                android:id="@+id/homeAnnounError"/>
+
             <android.support.v7.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
+                android:focusable="false"
                 android:id="@+id/homeAnnouncements" />
 
             <LinearLayout

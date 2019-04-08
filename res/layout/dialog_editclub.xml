@@ -78,17 +78,20 @@
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Not accepting new members"/>
+                android:text="Not accepting new members"
+                android:id="@+id/dcd_btn0"/>
 
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New members require admin approval"/>
+                android:text="New members require admin approval"
+                android:id="@+id/dcd_btn1"/>
 
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Anyone can join!"/>
+                android:text="Anyone can join!"
+                android:id="@+id/dcd_btn2"/>
 
         </RadioGroup>
 
