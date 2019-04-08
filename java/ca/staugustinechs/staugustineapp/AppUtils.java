@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 
@@ -46,7 +47,9 @@ import ca.staugustinechs.staugustineapp.Objects.SongItem;
 
 public class AppUtils {
 
-    public static boolean APP_ONLINE, ALLOW_ACCOUNTS;
+    public static String SONG_REQUEST_THEME;
+    public static String ANDROID_VERSION;
+    public static boolean APP_ONLINE, ALLOW_ACCOUNTS, SHOW_USERS_ON_SONGS;
     public static int PRIMARY_COLOR, PRIMARY_DARK_COLOR, ACCENT_COLOR, STATUS_TWO_COLOR;
     public static ColorStateList PRIMARY_COLORSL, ACCENT_COLORSL;
     public static int[] PIC_COSTS;
@@ -54,6 +57,7 @@ public class AppUtils {
     public static double SUPER_VOTE_MULT;
     public static int SUPER_VOTE_MIN;
     public static int STARTING_POINTS, ATTENDING_EVENT_POINTS, JOINING_CLUB_POINTS;
+    public static boolean SHOW_LOGO_IN_TT, ADD_K12_TO_TT;
 
     public static boolean shouldGetFile(String imgName, Activity activity) {
         File file = activity.getFileStreamPath(imgName);
@@ -97,9 +101,13 @@ public class AppUtils {
     }
 
     public static boolean isNetworkAvailable(Activity activity) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        if(activity != null){
+            ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }else{
+            return false;
+        }
     }
 
     public static int dpToPx(float dp, Activity activity) {
@@ -112,9 +120,12 @@ public class AppUtils {
     }
 
     public static int getDeviceDimen(int dimen, Activity activity){
-        float targetDp = 4f;
-        float density = activity.getResources().getDisplayMetrics().density;
-        return Math.round(AppUtils.getDimen(dimen, activity) * (density / targetDp));
+        if(activity != null){
+            float targetDp = 4f;
+            float density = activity.getResources().getDisplayMetrics().density;
+            return Math.round(AppUtils.getDimen(dimen, activity) * (density / targetDp));
+        }
+        return 0;
     }
 
     public static boolean loadCalendarAdded(Activity activity) {
@@ -261,13 +272,13 @@ public class AppUtils {
     public static byte[] getImgBytes(Bitmap img, int width, int height, Activity activity){
         try {
             if(width <= 0 || height <= 0){
-                width = 500;
+                width = 700;
                 height = (int) (((double) width / (double) img.getWidth()) * (double) img.getHeight());
             }
             img = Bitmap.createScaledBitmap(img, width, height, false);
 
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            img.compress(Bitmap.CompressFormat.JPEG, Main.IMG_QUALITY, stream);
+            img.compress(Bitmap.CompressFormat.PNG, Main.IMG_QUALITY, stream);
             byte[] byteArray = stream.toByteArray();
             img.recycle();
 
@@ -325,6 +336,8 @@ public class AppUtils {
         AppUtils.APP_ONLINE = frc.getBoolean("AppOnline");
         AppUtils.ALLOW_ACCOUNTS = frc.getBoolean("AllowAccounts");
 
+        AppUtils.ANDROID_VERSION = frc.getString("ANDROID_VERSION");
+
         AppUtils.PRIMARY_COLOR = Color.parseColor(frc.getString("primaryColor"));
         AppUtils.PRIMARY_DARK_COLOR = Color.parseColor(frc.getString("darkerPrimary"));
         AppUtils.ACCENT_COLOR = Color.parseColor(frc.getString("accentColor"));
@@ -333,21 +346,26 @@ public class AppUtils {
         AppUtils.STATUS_TWO_COLOR = Color.parseColor(frc.getString("statusTwoPrimary"));
 
         AppUtils.PIC_COSTS = new int[5];
-        AppUtils.PIC_COSTS[0] = Math.toIntExact(frc.getLong("basicPic"));
-        AppUtils.PIC_COSTS[1] = Math.toIntExact(frc.getLong("commonPic"));
-        AppUtils.PIC_COSTS[2] = Math.toIntExact(frc.getLong("rarePic"));
-        AppUtils.PIC_COSTS[3] = Math.toIntExact(frc.getLong("coolPic"));
-        AppUtils.PIC_COSTS[4] = Math.toIntExact(frc.getLong("legendaryPic"));
+        AppUtils.PIC_COSTS[0] = (int) frc.getLong("basicPic");
+        AppUtils.PIC_COSTS[1] = (int) frc.getLong("commonPic");
+        AppUtils.PIC_COSTS[2] = (int) frc.getLong("rarePic");
+        AppUtils.PIC_COSTS[3] = (int) frc.getLong("coolPic");
+        AppUtils.PIC_COSTS[4] = (int) frc.getLong("legendaryPic");
 
-        AppUtils.MAX_SONGS = Math.toIntExact(frc.getLong("maxSongs"));
-        AppUtils.REQUEST_SONG_COST = Math.toIntExact(frc.getLong("requestSong"));
-
+        AppUtils.MAX_SONGS = (int) frc.getLong("maxSongs");
+        AppUtils.REQUEST_SONG_COST = (int) frc.getLong("requestSong");
+        AppUtils.SHOW_USERS_ON_SONGS = frc.getBoolean("showUsersOnSongs");
         AppUtils.SUPER_VOTE_MULT = frc.getDouble("supervoteRatio");
-        AppUtils.SUPER_VOTE_MIN = Math.toIntExact(frc.getLong("supervoteMin"));
+        AppUtils.SUPER_VOTE_MIN = (int) frc.getLong("supervoteMin");
 
-        AppUtils.STARTING_POINTS = Math.toIntExact(frc.getLong("startingPoints"));
-        AppUtils.ATTENDING_EVENT_POINTS = Math.toIntExact(frc.getLong("attendingEvent"));
-        AppUtils.JOINING_CLUB_POINTS = Math.toIntExact(frc.getLong("joiningClub"));
+        AppUtils.STARTING_POINTS = (int) frc.getLong("startingPoints");
+        AppUtils.ATTENDING_EVENT_POINTS = (int) frc.getLong("attendingEvent");
+        AppUtils.JOINING_CLUB_POINTS = (int) frc.getLong("joiningClub");
+
+        AppUtils.SONG_REQUEST_THEME = frc.getString("songRequestTheme");
+
+        AppUtils.SHOW_LOGO_IN_TT = frc.getBoolean("showLogoInTT");
+        AppUtils.ADD_K12_TO_TT = frc.getBoolean("addK12ToTT");
     }
 
     public static void performCrop(Uri picUri, int width, int height, int code, Activity activity) {
@@ -372,6 +390,14 @@ public class AppUtils {
         catch (ActivityNotFoundException anfe) {
             // display an error message
             anfe.printStackTrace();
+        }
+    }
+
+    public static int longToInt(Long number){
+        if(Build.VERSION.SDK_INT > 23) {
+            return Math.toIntExact(number);
+        }else{
+            return (int) ((long) number);
         }
     }
 }

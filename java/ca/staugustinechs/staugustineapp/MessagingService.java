@@ -147,6 +147,7 @@ public class MessagingService extends FirebaseMessagingService {
     public static void registerToken(final String token){
         FirebaseFirestore.getInstance().collection("users")
                 .document(FirebaseAuth.getInstance().getUid())
+                .collection("info").document("vital")
                 .update("msgToken", token)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -168,7 +169,7 @@ public class MessagingService extends FirebaseMessagingService {
 
     @Override
     public void onNewToken(String s) {
-        msgToken = s;
-        Main.REGISTER_TOKEN = true;
+        /*msgToken = s;
+        Main.REGISTER_TOKEN = true;*/
     }
 }
