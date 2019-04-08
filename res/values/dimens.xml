@@ -18,6 +18,6 @@
     <dimen name="icon_small_size">180px</dimen>
     <dimen name="banner_width">1280px</dimen>
     <dimen name="banner_height">720px</dimen>
-    <dimen name="icon_big_size">600px</dimen>
+    <dimen name="icon_big_size">500px</dimen>
     <dimen name="tag_size">1000px</dimen>
 </resources>
