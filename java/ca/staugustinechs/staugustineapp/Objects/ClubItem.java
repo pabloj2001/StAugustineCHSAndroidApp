@@ -45,7 +45,7 @@ public class ClubItem implements Serializable {
         this.name = (String) data.get("name");
         this.desc = (String) data.get("desc");
         this.imgName = imgName.isEmpty() ? (String) data.get("img") : imgName;
-        this.joinPref = Math.toIntExact((long) data.get("joinPref"));
+        this.joinPref = (int) (long) data.get("joinPref");
         this.admins = (List<String>) data.get("admins");
         this.members = (List<String>) data.get("members");
         this.pendingList = (List<String>) data.get("pending");
@@ -80,6 +80,14 @@ public class ClubItem implements Serializable {
         return desc;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     public String getImgName(){
         return imgName;
     }
@@ -98,6 +106,10 @@ public class ClubItem implements Serializable {
 
     public int getJoinPref(){
         return joinPref;
+    }
+
+    public void setJoinPref(int joinPref) {
+        this.joinPref = joinPref;
     }
 
     public String getClubBadge(){
@@ -123,12 +135,22 @@ public class ClubItem implements Serializable {
     }
 
     public int removeMember(UserProfile user) {
+        //UNSUBRSCRIBE USER FROM NOTIFICATIONS
         if(user.getUid().equals(Main.PROFILE.getUid())){
             Main.PROFILE.removeNotification(this.getId(), null);
         }else{
             MessagingService.unsubscribe(this.getId(), user.getUid(), user.getMessagingToken(), null);
         }
 
+        //TAKE AWAY BADGE
+        user.removeBadge(clubBadge, null);
+        //TAKE AWAY POINTS FROM USER IF THE CLUB JOIN PREF IS 1
+        if(this.getJoinPref() == 1 && (getMembers().contains(user.getUid())
+                || getAdmins().contains(user.getUid()))){
+            user.updatePoints(-AppUtils.JOINING_CLUB_POINTS, true, null, null);
+        }
+
+        //REMOVE USER FROM CLUB DEPENDING WHETHER USER IS IN PENDING, MEMBER, OR ADMIN LIST
         if(this.getMembers().contains(user.getUid())){
             FirebaseFirestore.getInstance().collection("clubs")
                     .document(this.getId())
@@ -151,6 +173,7 @@ public class ClubItem implements Serializable {
             removeClubFromUser(user.getUid());
             return ClubMemberList.PENDING;
         }
+
         return -1;
     }
 
@@ -185,6 +208,11 @@ public class ClubItem implements Serializable {
             MessagingService.subscribe(this.getId(), user.getUid(), user.getMessagingToken(), null);
             MessagingService.sendMessageToUser(user.getMessagingToken(), "Welcome To The Club!",
                     "You've been accepted into " + this.getName() + "! Yay!");
+
+            //GIVE USER BADGE
+            user.giveBadge(clubBadge, null);
+            //GIVE USER POINTS
+            user.updatePoints(AppUtils.JOINING_CLUB_POINTS, false, null, null);
 
             this.pendingList.remove(user.getUid());
             this.members.add(user.getUid());

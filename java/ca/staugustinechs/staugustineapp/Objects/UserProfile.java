@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Transaction;
@@ -38,28 +39,31 @@ public class UserProfile {
     private ProfileIcon icon;
     private List<String> notifications;
 
-    public UserProfile(String uid, Map<String, Object> data){
+    public UserProfile(String uid, Map<String, Object> infoData, Map<String, Object> data){
         this.uid = uid;
-        email = (String) data.get("email");
-        name = (String) data.get("name");
+        email = (String) infoData.get("email");
+        name = (String) infoData.get("name");
+
+        if(infoData.get("profilePic") instanceof Integer){
+            profilePic = (int) infoData.get("profilePic");
+        }else{
+            profilePic = AppUtils.longToInt((Long) infoData.get("profilePic"));
+        }
+
+        if(infoData.containsKey("msgToken")){
+            messagingToken = (String) infoData.get("msgToken");
+        }
+
         schedule = (List<String>) data.get("classes");
         clubs = (List<String>) data.get("clubs");
         badges = (List<String>) data.get("badges");
 
-        if(data.get("profilePic") instanceof Integer){
-            profilePic = (int) data.get("profilePic");
-        }else{
-            profilePic = Math.toIntExact((Long) data.get("profilePic"));
-        }
-
         picsOwned = new ArrayList<Integer>();
         if(((List) data.get("picsOwned")).get(0) instanceof Integer){
-            for(Integer pic : (List<Integer>) data.get("picsOwned")){
-                picsOwned.add(Math.toIntExact(pic));
-            }
+            picsOwned.addAll((List<Integer>) data.get("picsOwned"));
         }else{
             for(Long pic : (List<Long>) data.get("picsOwned")){
-                picsOwned.add(Math.toIntExact(pic));
+                picsOwned.add(AppUtils.longToInt(pic));
             }
         }
 
@@ -69,20 +73,16 @@ public class UserProfile {
         if(data.get("status") instanceof Integer){
             status = (int) data.get("status");
         }else{
-            status = Math.toIntExact((Long) data.get("status"));
+            status = AppUtils.longToInt((Long) data.get("status"));
         }
 
         Object pointsObj = data.get("points");
         if(pointsObj instanceof Long){
-            points = Math.toIntExact((Long) pointsObj);
+            points = AppUtils.longToInt((Long) pointsObj);
         }else if(pointsObj instanceof Double){
             points = (int) Math.round((Double) pointsObj);
         }else if(pointsObj instanceof Integer){
             points = (int) pointsObj;
-        }
-
-        if(data.containsKey("msgToken")){
-            messagingToken = (String) data.get("msgToken");
         }
 
         if(data.containsKey("notifications")){
@@ -92,7 +92,7 @@ public class UserProfile {
         if(data.containsKey("gradYear")){
             Object gradYearObj = data.get("gradYear");
             if(gradYearObj instanceof Long){
-                gradYear = Math.toIntExact((Long) gradYearObj);
+                gradYear = AppUtils.longToInt((Long) gradYearObj);
             }else if(gradYearObj instanceof Double){
                 gradYear = (int) Math.round((Double) gradYearObj);
             }else if(gradYearObj instanceof Integer){
@@ -100,6 +100,22 @@ public class UserProfile {
             }
         }else{
             gradYear = -1;
+        }
+    }
+
+    public UserProfile(String uid, Map<String, Object> infoData){
+        this.uid = uid;
+        email = (String) infoData.get("email");
+        name = (String) infoData.get("name");
+
+        if(infoData.get("profilePic") instanceof Integer){
+            profilePic = (int) infoData.get("profilePic");
+        }else{
+            profilePic = AppUtils.longToInt((Long) infoData.get("profilePic"));
+        }
+
+        if(infoData.containsKey("msgToken")){
+            messagingToken = (String) infoData.get("msgToken");
         }
     }
 
@@ -155,17 +171,23 @@ public class UserProfile {
         return icon;
     }
 
+    public void setLocalIcon(ProfileIcon icon){
+        this.icon = icon;
+    }
+
     public void setIcon(ProfileIcon icon){
         this.icon = icon;
         FirebaseFirestore.getInstance().collection("users")
-                .document(this.getUid()).update("profilePic", icon.getId());
+                .document(this.getUid()).collection("info")
+                .document("vital").update("profilePic", icon.getId());
     }
 
     public String getUid() {
         return uid;
     }
 
-    public void updatePoints(final int points, OnCompleteListener listener, OnFailureListener failureListener) {
+    public void updatePoints(final int points, final boolean override,
+                             OnCompleteListener listener, OnFailureListener failureListener) {
         this.points += points;
 
         final DocumentReference ref = FirebaseFirestore.getInstance()
@@ -179,7 +201,7 @@ public class UserProfile {
             }
         });
 
-        if(points > 0 && this.getGradYear() > 0){
+        if((points > 0 || override) && this.getGradYear() > 0){
             final DocumentReference ref2 = FirebaseFirestore.getInstance()
                     .collection("info").document("spiritPoints");
             FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<Void>() {
@@ -236,5 +258,21 @@ public class UserProfile {
                 }
             }
         });
+    }
+
+    public void giveBadge(String clubBadge, OnCompleteListener listener) {
+        if(clubBadge != null && !clubBadge.isEmpty()){
+            FirebaseFirestore.getInstance().collection("users")
+                    .document(this.getUid()).update("badges", FieldValue.arrayUnion(clubBadge))
+                    .addOnCompleteListener(listener);
+        }
+    }
+
+    public void removeBadge(String clubBadge, OnCompleteListener listener){
+        if(clubBadge != null && !clubBadge.isEmpty()){
+            FirebaseFirestore.getInstance().collection("users")
+                    .document(this.getUid()).update("badges", FieldValue.arrayRemove(clubBadge))
+                    .addOnCompleteListener(listener);
+        }
     }
 }

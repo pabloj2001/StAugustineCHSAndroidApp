@@ -9,17 +9,19 @@ public class SongItem {
     private String id;
     private String title;
     private String artist;
+    private String suggestor;
     private int upvotes;
     private boolean clicked, superVoted;
 
     public SongItem(String id, Map<String, Object> data){
         this.title = (String) data.get("name");
         this.artist = (String) data.get("artist");
+        this.suggestor = (String) data.get("suggestor");
         Object upv = data.get("upvotes");
         if(upv instanceof Long){
-            this.upvotes = (int) Math.toIntExact((Long) data.get("upvotes"));
+            this.upvotes = (int) (long) data.get("upvotes");
         }else if(upv instanceof Double){
-            this.upvotes = (int) Math.round((Double) data.get("upvotes"));
+            this.upvotes = (int) (double) data.get("upvotes");
         }
         this.id = id;
     }
@@ -34,6 +36,10 @@ public class SongItem {
 
     public String getArtist() {
         return artist;
+    }
+
+    public String getSuggestor(){
+        return suggestor;
     }
 
     public int getUpvotes() {

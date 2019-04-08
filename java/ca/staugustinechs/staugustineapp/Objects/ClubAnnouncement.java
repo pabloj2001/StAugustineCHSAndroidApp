@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ClubAnnouncement {
 
-    String title, content, id, imgName, club, clubName;
+    String title, content, id, imgName, club, clubName, creator;
     Date date;
     Bitmap img;
 
@@ -23,6 +23,7 @@ public class ClubAnnouncement {
         this.img = img;
         this.club = (String) data.get("club");
         this.clubName = (String) data.get("clubName");
+        this.creator = (String) data.get("creator");
         this.id = id;
     }
 
@@ -56,5 +57,9 @@ public class ClubAnnouncement {
 
     public String getClubName() {
         return clubName;
+    }
+
+    public String getCreator() {
+        return creator;
     }
 }
