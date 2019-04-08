@@ -167,6 +167,7 @@ public class ClubMemberList extends AppCompatActivity {
             ((RViewAdapter_MemberList) cmlMemberList.getAdapter()).removeItem(user);
             cmlMemberList.getAdapter().notifyDataSetChanged();
         }
+
         ClubDetails.NEEDS_UPDATE = true;
     }
 
@@ -182,9 +183,6 @@ public class ClubMemberList extends AppCompatActivity {
 
     public void accept(UserProfile user) {
         club.acceptUser(user);
-
-        //GIVE USER POINTS
-        user.updatePoints(AppUtils.JOINING_CLUB_POINTS, null, null);
 
         ((RViewAdapter_MemberList) cmlMemberList.getAdapter()).removeItem(user);
         cmlMemberList.getAdapter().notifyDataSetChanged();

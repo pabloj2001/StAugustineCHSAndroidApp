@@ -1,5 +1,6 @@
 package ca.staugustinechs.staugustineapp.Activities;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -42,8 +43,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,6 +56,7 @@ import java.util.Map;
 import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetBadgesTask;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetClubAnnounsTask;
+import ca.staugustinechs.staugustineapp.AsyncTasks.GetUserTask;
 import ca.staugustinechs.staugustineapp.DialogFragments.AddClubAnnounDialog;
 import ca.staugustinechs.staugustineapp.DialogFragments.CreateBadgeDialog;
 import ca.staugustinechs.staugustineapp.DialogFragments.EditAnnounDialog;
@@ -62,6 +66,7 @@ import ca.staugustinechs.staugustineapp.Interfaces.BadgeGetter;
 import ca.staugustinechs.staugustineapp.Interfaces.ClubAnnounGetter;
 import ca.staugustinechs.staugustineapp.MessagingService;
 import ca.staugustinechs.staugustineapp.Objects.Badge;
+import ca.staugustinechs.staugustineapp.Objects.UserProfile;
 import ca.staugustinechs.staugustineapp.R;
 import ca.staugustinechs.staugustineapp.Objects.ClubItem;
 import ca.staugustinechs.staugustineapp.Objects.ClubAnnouncement;
@@ -91,11 +96,16 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
     private GetClubAnnounsTask getClubAnnounsTask;
     private Button cdJoinBtn;
     private ImageButton cdBadgesAdd;
+    private RViewAdapter_ClubAnnouns adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clubdetails);
+
+        //SET STATUS BAR COLOR
+        getWindow().setNavigationBarColor(AppUtils.PRIMARY_DARK_COLOR);
+        getWindow().setStatusBarColor(AppUtils.PRIMARY_DARK_COLOR);
 
         this.getSupportActionBar().setTitle("Clubs");
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -349,7 +359,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         final String imgName = ((club.getImgName() != null && !club.getImgName().isEmpty())
                 ? club.getImgName().split("_")[0] : AppUtils.getRandomKey(20));
         if (img != null) {
-            byte[] imgBytes = AppUtils.getImgBytes(img, 0, 0, this);
+            byte[] imgBytes = AppUtils.getImgBytes(img, 1280, 720, this);
             AppUtils.uploadImg(imgName, imgBytes, "clubBanners/",
                     new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -366,7 +376,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         }
     }
 
-    private void updateDBClub(String name, String desc, Uri img, String imgName, final int checked){
+    private void updateDBClub(final String name, final String desc, final Uri img, String imgName, final int checked){
         //GATHER DATA
         Map<String, Object> data = new HashMap<>();
         data.put("name", name);
@@ -403,7 +413,21 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                             }
 
                             showPostSnack(9);
-                            restartClub();
+
+                            //UPDATE CLUB STUFF
+                            club.setJoinPref(checked);
+                            club.setName(name);
+                            club.setDesc(desc);
+                            cdName.setText(name);
+                            cdName2.setText(name);
+                            cdDesc.setText(desc);
+                            if(img != null){
+                                Picasso.with(ClubDetails.this)
+                                        .load(img)
+                                        .into(cdBanner);
+                            }
+                            //UPDATE CLUBS WHEN USER EXITS ClubDetails
+                            ClubsFragment.REFRESH_CLUBS = true;
                         } else {
                             showPostSnack(10);
                         }
@@ -620,7 +644,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             cdAnnounError.setVisibility(View.GONE);
 
             //SORT ANNOUNCEMENTS BY DATE
-            this.announs.sort(new Comparator<ClubAnnouncement>() {
+            Collections.sort(this.announs, new Comparator<ClubAnnouncement>() {
                 @Override
                 public int compare(ClubAnnouncement o1, ClubAnnouncement o2) {
                     if(o1.getDate().before(o2.getDate())){
@@ -633,15 +657,36 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
 
             cdLoadingCircle2.setVisibility(View.GONE);
 
-            RViewAdapter_ClubAnnouns adapter = new RViewAdapter_ClubAnnouns(this.announs, this);
-            rv2.setAdapter(adapter);
+            if(adapter == null){
+                adapter = new RViewAdapter_ClubAnnouns(this.announs, this);
+                rv2.setAdapter(adapter);
+            }else{
+                adapter.setAnnouncements(announs);
+            }
+
+            List<String> users = new ArrayList<String>();
+            for(ClubAnnouncement announ : announs){
+                if(!adapter.containsCreator(announ.getCreator())) {
+                    users.add(announ.getCreator());
+                }
+            }
+
+            //FOR THE LAST TIME, DON'T DO THISS!!!
+            @SuppressLint("StaticFieldLeak")
+            GetUserTask task = new GetUserTask(this, users){
+                @Override
+                protected void onPostExecute(List<UserProfile> users) {
+                    adapter.addCreators(users);
+                }
+            };
+            task.execute();
 
             View rvView = this.findViewById(R.id.cdAnnouncements);
             rvView.setVisibility(View.VISIBLE);
-
-            cdSwipeRefresh.setRefreshing(false);
-            cdSwipeRefresh.setEnabled(true);
         }
+
+        cdSwipeRefresh.setRefreshing(false);
+        cdSwipeRefresh.setEnabled(true);
 
         cdScrollView.requestFocus();
         cdScrollView.postDelayed(new Runnable() {
@@ -652,7 +697,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         }, 1L);
     }
 
-    public void createBadge(Uri selectedImage, String desc, final boolean memberBadge) {
+    public void createBadge(Uri selectedImage, String desc, final boolean clubBadge) {
         final Map<String, Object> data = new HashMap<String, Object>();
         data.put("club", club.getId());
         data.put("desc", desc);
@@ -675,7 +720,8 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if(task.isSuccessful()){
-                                    if(memberBadge){
+                                    if(clubBadge){
+                                        //UPDATE CLUB TO HAVE CLUB BADGE
                                         FirebaseFirestore.getInstance().collection("clubs")
                                                 .document(club.getId())
                                                 .update("clubBadge", doc.getId())
@@ -772,8 +818,6 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             getBadgesTask = new GetBadgesTask(this);
             getBadgesTask.execute();
         }
-
-
     }
 
     public void restartClub(){
@@ -954,6 +998,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                     }
                 }
             }else{
+                dialog.setClubBadge(true);
                 dialog.show(this.getSupportFragmentManager(), "createClubBadgeDialog");
             }
         }else if(item.getItemId() == itemToggleNotifs){

@@ -73,6 +73,12 @@ public class Profile extends AppCompatActivity implements UserGetter, BadgeGette
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_profile);
+
+        //SET STATUS BAR COLOR
+        getWindow().setNavigationBarColor(AppUtils.PRIMARY_DARK_COLOR);
+        getWindow().setStatusBarColor(AppUtils.PRIMARY_DARK_COLOR);
+
+        //SET ACTIVITY TITLE AND COLOR
         this.getSupportActionBar().setTitle("Profile");
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         this.getSupportActionBar().setBackgroundDrawable(new ColorDrawable(AppUtils.PRIMARY_COLOR));
@@ -141,11 +147,7 @@ public class Profile extends AppCompatActivity implements UserGetter, BadgeGette
 
             String userEmail = getIntent().getExtras().getString("USER_EMAIL");
             if(userEmail.isEmpty()){
-                if(Main.PROFILE == null){
-                    searchProfile(Main.PROFILE.getEmail(), false);
-                }else{
-                    updateProfile(Arrays.asList(Main.PROFILE));
-                }
+                updateProfile(Arrays.asList(Main.PROFILE));
             }else{
                 BACK_ENABLED = false;
                 searchProfile(userEmail, false);
@@ -234,7 +236,13 @@ public class Profile extends AppCompatActivity implements UserGetter, BadgeGette
             }else{
                 if(user.showClasses()){
                     getClassesInCommon();
-                    profileSchedule.setText(classesInCommon.size() + " Class(es) in Common");
+                    if(classesInCommon.size() == 0){
+                        profileSchedule.setText("No Classes in Common");
+                    }else if(classesInCommon.size() == 1){
+                        profileSchedule.setText("1 Class in Common");
+                    }else{
+                        profileSchedule.setText(classesInCommon.size() + " Classes in Common");
+                    }
                     profileSchedule.setVisibility(View.VISIBLE);
                 }else{
                     profileSchedule.setVisibility(View.GONE);
@@ -295,7 +303,7 @@ public class Profile extends AppCompatActivity implements UserGetter, BadgeGette
             if (searchView != null) {
                 searchView.setLayoutParams(new ActionBar.LayoutParams(Gravity.RIGHT));
                 searchView.setQueryHint("YCDSBK12 Email");
-                if(Build.VERSION.SDK_INT > 24){
+                if(Build.VERSION.SDK_INT > 25){
                     searchView.setAutofillHints(SearchView.AUTOFILL_HINT_EMAIL_ADDRESS);
                     searchView.setTooltipText("YCDSBK12 Email");
                 }
@@ -412,7 +420,7 @@ public class Profile extends AppCompatActivity implements UserGetter, BadgeGette
     @Override
     public void onResume(){
         if(Main.UPDATE_ICON){
-            this.user.setIcon(Main.PROFILE.getIcon());
+            this.user.setLocalIcon(Main.PROFILE.getIcon());
             setViews();
         }
         super.onResume();

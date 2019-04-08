@@ -18,6 +18,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -44,40 +45,36 @@ import ca.staugustinechs.staugustineapp.R;
 public class Login extends AppCompatActivity implements View.OnClickListener {
 
     private int RC_SIGN_IN = 9823;
+    private SignInButton signInButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        //SET STATUS BAR COLOR
+        getWindow().setNavigationBarColor(AppUtils.PRIMARY_DARK_COLOR);
+        getWindow().setStatusBarColor(AppUtils.PRIMARY_DARK_COLOR);
+
         this.getSupportActionBar().setTitle(R.string.app_name);
         this.getSupportActionBar().setBackgroundDrawable(new ColorDrawable(AppUtils.PRIMARY_COLOR));
 
-        SignInButton signInButton = (SignInButton) findViewById(R.id.signInButton);
+        signInButton = (SignInButton) findViewById(R.id.signInButton);
         signInButton.setOnClickListener(this);
     }
 
     public void createSignInIntent() {
-        // [START auth_fui_create_intent]
-        // Choose authentication providers
-        //List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build());
-
-        // Create and launch sign-in intent
+        //MAKE GOOGLE SIGN IN OPTIONS
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.web_client_id))
                 .requestEmail()
                 .build();
 
-        startActivityForResult(
-                GoogleSignIn.getClient(this, gso).getSignInIntent(),
-                RC_SIGN_IN);
+        GoogleSignInClient googleClient = GoogleSignIn.getClient(this, gso);
+        googleClient.signOut();
 
-       /* startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(providers)
-                        .build(), RC_SIGN_IN);*/
-        // [END auth_fui_create_intent]
+        //CREATE SIGN IN WINDOW
+        startActivityForResult(googleClient.getSignInIntent(), RC_SIGN_IN);
     }
 
     // [START auth_fui_result]
@@ -98,10 +95,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if(task.isSuccessful()){
                                         finishSignIn();
+                                    }else{
+                                        signInButton.setEnabled(true);
                                     }
                                 }
                             });
                 }else{
+                    signInButton.setEnabled(true);
                     Toast.makeText(this,
                             "Sorry, you aren't a member of St. A's (Be sure to use your 'ycdsbk12' account!)",
                             Toast.LENGTH_LONG).show();
@@ -111,6 +111,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 // sign-in flow using the back button. Otherwise check
                 // response.getError().getErrorCode() and handle the error.
                 // ...
+                signInButton.setEnabled(true);
                 Toast.makeText(this, "Sign in Failed!", Toast.LENGTH_LONG).show();
             }
         }
@@ -147,6 +148,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if(AppUtils.isNetworkAvailable(this)){
+            //DISABLE SIGN IN BUTTON
+            signInButton.setEnabled(false);
+            //ATTEMPT TO SIGN IN
             createSignInIntent();
         }else{
             Toast.makeText(this, "Internet Unavailable", Toast.LENGTH_SHORT).show();

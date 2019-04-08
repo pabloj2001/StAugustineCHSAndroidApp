@@ -1,6 +1,9 @@
 package ca.staugustinechs.staugustineapp.Activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -9,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -63,7 +68,7 @@ import ca.staugustinechs.staugustineapp.R;
 import ca.staugustinechs.staugustineapp.Interfaces.UserGetter;
 
 public class Main extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, UserGetter, IconGetter{
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, UserGetter, IconGetter {
 
     public static final String CALENDAR_ADDED = "calendarAdded.dat";
     public static final int STUDENT = 0, TEACHER = 1, DEV = 2;
@@ -83,56 +88,56 @@ public class Main extends AppCompatActivity
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         //INIT SOME FIREBASE SETTINGS
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
         FirebaseFirestore.getInstance().setFirestoreSettings(settings);
 
-        //FIREBASE REMOTE CONFIG
-        final FirebaseRemoteConfig frc = FirebaseRemoteConfig.getInstance();
-        frc.fetch(360)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()) {
-                    frc.activateFetched();
-                }
-                AppUtils.setDefaultVariables();
-
-                Main.this.init(savedInstanceState);
-            }
-        });
-    }
-
-    private void init(Bundle savedInstanceState){
         //FIREBASE MESSAGING SETTINGS
         FirebaseMessaging.getInstance().setAutoInitEnabled(true);
-        if(savedInstanceState == null){
-            if(FirebaseAuth.getInstance().getCurrentUser() == null){
+
+        //SET PROPER THEME (PREVIOUS IS LAUNCH THEME)
+        this.setTheme(R.style.AppTheme_NoActionBar);
+        super.onCreate(savedInstanceState);
+        this.init(savedInstanceState);
+    }
+
+    private void init(Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
                 //GO TO LOGIN ACTIVITY
                 Intent intent = new Intent(this, Login.class);
                 startActivity(intent);
                 finish();
-            }else if(AppUtils.shouldGetFile(FirebaseAuth.getInstance().getUid() + SignUp.SIGNUP_FILE,
-                    this)){
+            } else if (AppUtils.shouldGetFile(FirebaseAuth.getInstance().getUid() + SignUp.SIGNUP_FILE,
+                    this)) {
                 //GO TO SIGN UP ACTIVITY
                 Intent intent = new Intent(this, SignUp.class);
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 setContentView(R.layout.activity_home);
 
                 //SET CRASHLYTICS IDENTIFIER
                 Crashlytics.setUserIdentifier(FirebaseAuth.getInstance().getUid());
 
+                //REGISTER MSG ID WITH FIRESTORE
+                FirebaseInstanceId.getInstance().getInstanceId()
+                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                if (task.isSuccessful()) {
+                                    MessagingService.registerToken(task.getResult().getToken());
+                                }
+                            }
+                        });
+
                 //SET TOOLBAR
                 toolbar = (Toolbar) findViewById(R.id.toolbar);
                 setSupportActionBar(toolbar);
 
-                if(AppUtils.APP_ONLINE){
+                if (AppUtils.APP_ONLINE) {
                     //CREATE NOTIFICATIONS CHANNEL
                     MessagingService.createNotificationChannel(this);
 
@@ -148,7 +153,7 @@ public class Main extends AppCompatActivity
                     drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                     ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                             this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-                    toggle.setToolbarNavigationClickListener(new View.OnClickListener(){
+                    toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             drawer.openDrawer(GravityCompat.START);
@@ -163,7 +168,37 @@ public class Main extends AppCompatActivity
                     navigationView.setNavigationItemSelectedListener(this);
 
                     this.updateColors();
-                }else{
+
+                    try {
+                        //IF USER DOESN'T HAVE THE NEWEST VERSION, SHOOT THEM A MESSAGE...
+                        PackageInfo info = this.getPackageManager()
+                                .getPackageInfo(this.getPackageName(), PackageManager.GET_ACTIVITIES);
+                        if(!AppUtils.ANDROID_VERSION.equals(info.versionName)){
+                            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                            builder.setTitle("New Update Available!");
+                            builder.setMessage("There is a new update available for the app on the Play store!" +
+                                    " You should go get it.");
+                            builder.setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            /*Button btn = new Button(this);
+                            btn.setText("HEAD TO THE STORE!");
+                            btn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                }
+                            });
+                            builder.setView(btn);*/
+                            builder.create().show();
+                        }
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                } else {
                     toolbar.setTitle("APP CURRENTLY OFFLINE");
                     LinearLayout layout = findViewById(R.id.mainLayout);
                     layout.removeView(findViewById(R.id.main_fragment_container));
@@ -190,41 +225,42 @@ public class Main extends AppCompatActivity
         navigationView.setItemTextColor(colorStateList);
     }
 
-    public void refreshProfile(){
+    public void refreshProfile() {
         userTask = new GetUserTask(this,
-                Arrays.asList(FirebaseAuth.getInstance().getUid()));
+                Arrays.asList(FirebaseAuth.getInstance().getUid()), true);
         userTask.execute();
     }
 
     @Override
-    public void updateProfile(List<UserProfile> users){
-        if(users != null && !users.isEmpty()){
+    public void updateProfile(List<UserProfile> users) {
+        if (users != null && !users.isEmpty() && users.get(0) != null
+                && users.get(0).getIcon().getImg() != null) {
             Main.PROFILE = users.get(0);
-            homeFragment.refreshAnnouns();
-
             updateUserInfo();
 
-            if(Main.REGISTER_TOKEN){
+            homeFragment.refreshAnnouns();
+
+           /* if (Main.REGISTER_TOKEN) {
                 MessagingService.registerToken();
-            }else if((Main.PROFILE.getMessagingToken() == null
+            } else if ((Main.PROFILE.getMessagingToken() == null
                     || Main.PROFILE.getMessagingToken().isEmpty())) {
+                //GET DEVICE MESSAGE ID AND REGISTER INTO FIRESTORE
                 FirebaseInstanceId.getInstance().getInstanceId()
                         .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                             @Override
                             public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                                if(task.isSuccessful()){
+                                if (task.isSuccessful()) {
                                     MessagingService.registerToken(task.getResult().getToken());
                                 }
                             }
                         });
-            }
-        }else{
+            }*/
+        } else {
             homeFragment.setOffline();
-           // updateUserInfoOffline();
         }
     }
 
-    private void updateUserInfo(){
+    private void updateUserInfo() {
         ImageView profilePic = (ImageView) findViewById(R.id.nav_profilePic);
         int px = AppUtils.getDeviceDimen(R.dimen.icon_size, this);
         profilePic.setImageBitmap(Bitmap.createScaledBitmap(Main.PROFILE.getIcon().getImg(), px, px, false));
@@ -243,17 +279,19 @@ public class Main extends AppCompatActivity
 
     @Override
     public void updateIcons(List<ProfileIcon> icons) {
-        Main.PROFILE.setIcon(icons.get(0));
+        Main.PROFILE.setLocalIcon(icons.get(0));
         updateUserInfo();
     }
 
     @Override
     public void onBackPressed() {
-        if(drawer.isDrawerOpen(GravityCompat.START)){
-            drawer.closeDrawer(GravityCompat.START);
-        }else{
-            super.onBackPressed();
+        if(drawer != null){
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+                return;
+            }
         }
+        super.onBackPressed();
     }
 
     @Override
@@ -264,7 +302,7 @@ public class Main extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        switch(item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.nav_home:
                 toolbar.setTitle(R.string.app_name);
                 changeFragment(homeFragment);
@@ -301,7 +339,7 @@ public class Main extends AppCompatActivity
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.navGroup && AppUtils.isNetworkAvailable(this)){
+        if (v.getId() == R.id.navGroup && AppUtils.isNetworkAvailable(this)) {
             drawer.closeDrawer(GravityCompat.START);
             Intent intent = new Intent(this, Profile.class);
             intent.putExtra("USER_EMAIL", "");
@@ -309,8 +347,8 @@ public class Main extends AppCompatActivity
         }
     }
 
-    private void changeFragment(Fragment fragment){
-        if(!this.isDestroyed()) {
+    private void changeFragment(Fragment fragment) {
+        if (!this.isDestroyed()) {
             //getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, fragment).commit();
 
             FragmentManager manager = getSupportFragmentManager();
@@ -336,7 +374,7 @@ public class Main extends AppCompatActivity
 
     @Override
     public void onResume() {
-        if(UPDATE_ICON){
+        if (UPDATE_ICON) {
             UPDATE_ICON = false;
             updateUserInfo();
         }

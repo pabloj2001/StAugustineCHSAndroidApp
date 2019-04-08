@@ -59,6 +59,10 @@ public class SignUp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
+        //SET STATUS BAR COLOR
+        getWindow().setNavigationBarColor(AppUtils.PRIMARY_DARK_COLOR);
+        getWindow().setStatusBarColor(AppUtils.PRIMARY_DARK_COLOR);
+
         this.getSupportActionBar().setTitle("Sign Up");
         this.getSupportActionBar().setBackgroundDrawable(new ColorDrawable(AppUtils.PRIMARY_COLOR));
 
@@ -141,13 +145,10 @@ public class SignUp extends AppCompatActivity {
     }
 
     private void updateUser(final ProfileIcon icon, String[] classes, boolean[] prefs){
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final String email = user.getEmail();
         final Map<String, Object> data = new HashMap<String, Object>();
         data.put("classes", Arrays.asList(classes));
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String email = user.getEmail();
-        data.put("email", email);
-        data.put("name", user.getDisplayName());
-        data.put("profilePic", icon.getId());
         List<Integer> picsOwned = new ArrayList<Integer>();
         picsOwned.add(icon.getId());
         data.put("picsOwned", picsOwned);
@@ -167,24 +168,40 @@ public class SignUp extends AppCompatActivity {
         data.put("badges", new ArrayList<String>());
 
         FirebaseFirestore.getInstance().collection("users")
-                .document(FirebaseAuth.getInstance().getUid())
+                .document(user.getUid())
                 .set(data).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
-                    //SAVE THAT USER HAS SIGNED UP
-                    Map<String, String> signUpData = new HashMap<String, String>();
-                    signUpData.put("signedUp", "true");
-                    AppUtils.saveMapFile(FirebaseAuth.getInstance().getUid() + SignUp.SIGNUP_FILE,
-                            signUpData, SignUp.this);
+                    final Map<String, Object> vitalData = new HashMap<String, Object>();
+                    vitalData.put("email", email);
+                    vitalData.put("name", user.getDisplayName());
+                    vitalData.put("profilePic", icon.getId());
+                    vitalData.put("msgToken", "");
 
-                    Main.PROFILE = new UserProfile(FirebaseAuth.getInstance().getUid(), data);
-                    Main.PROFILE.setIcon(icon);
+                    FirebaseFirestore.getInstance()
+                            .collection("users")
+                            .document(user.getUid())
+                            .collection("info").document("vital")
+                            .set(vitalData).addOnCompleteListener(new OnCompleteListener<Void>(){
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            //SAVE THAT USER HAS SIGNED UP
+                            Map<String, String> signUpData = new HashMap<String, String>();
+                            signUpData.put("signedUp", "true");
+                            AppUtils.saveMapFile(user.getUid() + SignUp.SIGNUP_FILE,
+                                    signUpData, SignUp.this);
 
-                    FirebaseAnalytics.getInstance(SignUp.this).setUserProperty("grade", Main.PROFILE.getGradYear() + "");
+                            Main.PROFILE = new UserProfile(user.getUid(), vitalData, data);
+                            Main.PROFILE.setLocalIcon(icon);
 
-                    SignUp.this.startActivity(new Intent(SignUp.this, Main.class));
-                    SignUp.this.finish();
+                            FirebaseAnalytics.getInstance(SignUp.this)
+                                    .setUserProperty("grade",Main.PROFILE.getGradYear() + "");
+
+                            SignUp.this.startActivity(new Intent(SignUp.this, Main.class));
+                            SignUp.this.finish();
+                        }
+                    });
                 }
             }
         });

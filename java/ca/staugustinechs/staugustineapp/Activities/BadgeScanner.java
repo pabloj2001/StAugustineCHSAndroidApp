@@ -107,60 +107,73 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
                     .getVisionBarcodeDetector(options);
 
             isDone = false;
-            Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
-                    .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
-                        @Override
-                        public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
-                            if(cam != null){
-                                if(barcodes.size() > 0){
-                                    FirebaseVisionBarcode barcode = barcodes.get(0);
-                                    final String email = TitanTagEncryption.decrypt(barcode.getRawValue());
-                                    if(email.matches("[A-Za-z0-9.]+")){
-                                        if(dialogHidden){
-                                            dialogHidden = false;
+            try {
+                Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
+                        .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                            @Override
+                            public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                if (cam != null) {
+                                    if (barcodes.size() > 0) {
+                                        FirebaseVisionBarcode barcode = barcodes.get(0);
+                                        final String email = TitanTagEncryption.decrypt(barcode.getRawValue());
+                                        //MAKE SURE EMAIL IS DECODED PROPERLY
+                                        if (email.matches("[A-Za-z0-9.@]+")) {
+                                            if (dialogHidden) {
+                                                dialogHidden = false;
 
-                                            //VIBRATE DEVICE
-                                            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                                            // Vibrate for 500 milliseconds
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                v.vibrate(VibrationEffect.createOneShot(500,
-                                                        VibrationEffect.DEFAULT_AMPLITUDE));
-                                            } else {
-                                                //deprecated in API 26
-                                                v.vibrate(500);
+                                                //VIBRATE DEVICE
+                                                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                                                // Vibrate for 500 milliseconds
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                    v.vibrate(VibrationEffect.createOneShot(500,
+                                                            VibrationEffect.DEFAULT_AMPLITUDE));
+                                                } else {
+                                                    //deprecated in API 26
+                                                    v.vibrate(500);
+                                                }
+
+                                                //CREATE DIALOG PROMPTING ADMIN TO GIVE BADGE TO USER
+                                                AlertDialog.Builder builder = new AlertDialog.Builder(BadgeScanner.this);
+                                                builder.setMessage("Give badge to " + email + "?");
+                                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        dialogHidden = true;
+                                                        dialog.cancel();
+                                                    }
+                                                });
+                                                builder.setPositiveButton("Give", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        giveBadge(email);
+                                                        dialogHidden = true;
+                                                    }
+                                                });
+                                                builder.create().show();
                                             }
-
-                                            //CREATE DIALOG PROMPTING ADMIN TO GIVE BADGE TO USER
-                                            AlertDialog.Builder builder = new AlertDialog.Builder(BadgeScanner.this);
-                                            builder.setMessage("Give badge to " + email + "?");
-                                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    dialogHidden = true;
-                                                    dialog.cancel();
-                                                }
-                                            });
-                                            builder.setPositiveButton("Give", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    giveBadge(email);
-                                                    dialogHidden = true;
-                                                }
-                                            });
-                                            builder.create().show();
                                         }
                                     }
+                                    isDone = true;
                                 }
-                                isDone = true;
                             }
-                        }
-                    });
+                        });
+            }catch(Exception e){
+                isDone = true;
+            }
         }
     }
 
-    private void giveBadge(final String email){
+    private void giveBadge(String email){
+        final String showEmail = email;
+
+        //MAKE SURE IT CONTAINS @ycdsbk12.ca
+        if(!email.contains("@ycdsbk12.ca")){
+            email += "@ycdsbk12.ca";
+        }
+
+        //GET USER
         FirebaseFirestore.getInstance().collection("users")
-                .whereEqualTo("email", email + "@ycdsbk12.ca")
+                .whereEqualTo("email", email)
                 .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -169,33 +182,34 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
                     final TextView bsSummary = findViewById(R.id.bsSummary);
                     if(docs.size() > 0 && docs.get(0).exists()){
                         final UserProfile user = new UserProfile(docs.get(0).getId(), docs.get(0).getData());
-                        FirebaseFirestore.getInstance().collection("users")
-                                .document(user.getUid()).update("badges", FieldValue.arrayUnion(badgeId))
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task2) {
-                                        if (task2.isSuccessful()) {
-                                            bsSummary.setText("Given badge to \n" + email);
-                                            bsSummary.postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    if(!BadgeScanner.this.isDestroyed()){
-                                                        bsSummary.setText("Scan Titan Tag");
-                                                    }
-                                                }
-                                            }, 5000L);
-
-                                            //GIVE USER POINTS
-                                            user.updatePoints(AppUtils.ATTENDING_EVENT_POINTS, null, null);
-
-                                            //SEND NOTIFICATION TO USER
-                                            MessagingService.sendMessageToUser(docs.get(0).getString("msgToken"), "",
-                                                    "You Have Received A New Badge!");
+                        //GIVE USER BADGE
+                        user.giveBadge(badgeId, new OnCompleteListener() {
+                            @Override
+                            public void onComplete(@NonNull Task task2) {
+                                if (task2.isSuccessful()) {
+                                    //SAY THE BADGE WAS GIVEN
+                                    bsSummary.setText("Given badge to \n" + showEmail);
+                                    bsSummary.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if(!BadgeScanner.this.isDestroyed()){
+                                                bsSummary.setText("Scan Titan Tag");
+                                            }
                                         }
-                                    }
-                                });
+                                    }, 5000L);
+
+                                    //GIVE USER POINTS
+                                    user.updatePoints(AppUtils.ATTENDING_EVENT_POINTS, false,
+                                            null, null);
+
+                                    //SEND NOTIFICATION TO USER
+                                    MessagingService.sendMessageToUser(docs.get(0).getString("msgToken"), "",
+                                            "You Have Received A New Badge!");
+                                }
+                            }
+                        });
                     }else{
-                        bsSummary.setText("Couldn't give badge to " + email);
+                        bsSummary.setText("Couldn't give badge to " + showEmail);
                     }
                 }
             }
