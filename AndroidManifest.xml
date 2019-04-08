@@ -18,12 +18,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/stalogo_yellow"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".Activities.Main"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
+        <activity android:name=".Activities.Launcher"
+            android:theme="@style/AppTheme.Launcher"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -31,6 +29,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".Activities.Main"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
         <activity android:name=".Activities.Login"
             android:screenOrientation="portrait"/>
         <activity android:name=".Activities.SignUp"
