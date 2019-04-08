@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.firebase.ui.auth.data.model.User;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -63,17 +64,19 @@ public class RViewAdapter_MemberList extends RecyclerView.Adapter<RViewAdapter_M
         this.clubMemberList = clubMemberList;
 
         //SORT MEMBERS BY ALPHABETICAL ORDER
-        this.members.sort(new Comparator<UserProfile>() {
+        Collections.sort(this.members, new Comparator<UserProfile>() {
             @Override
             public int compare(UserProfile o1, UserProfile o2) {
-                for(int i = 0; i < o1.getName().length(); i++){
-                    if(i == o2.getName().length()){
-                        return 1;
-                    }else if(i < o2.getName().length()){
-                        if(o1.getName().charAt(i) < o2.getName().charAt(i)){
-                            return -1;
-                        }else if(o1.getName().charAt(i) > o2.getName().charAt(i)){
+                if(o1 != null && o2 != null) {
+                    for (int i = 0; i < o1.getName().length(); i++) {
+                        if (i == o2.getName().length()) {
                             return 1;
+                        } else if (i < o2.getName().length()) {
+                            if (o1.getName().charAt(i) < o2.getName().charAt(i)) {
+                                return -1;
+                            } else if (o1.getName().charAt(i) > o2.getName().charAt(i)) {
+                                return 1;
+                            }
                         }
                     }
                 }
@@ -94,54 +97,56 @@ public class RViewAdapter_MemberList extends RecyclerView.Adapter<RViewAdapter_M
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final RViewAdapter_MemberList.ViewHolder holder, final int position) {
-        int px = AppUtils.getDeviceDimen(R.dimen.icon_small_size, clubMemberList);
-        Bitmap bmp = Bitmap.createScaledBitmap(members.get(position).getIcon().getImg(),
-                px, px, false);
-        holder.userImg.setImageBitmap(bmp);
+        if(members.get(position) != null) {
+            int px = AppUtils.getDeviceDimen(R.dimen.icon_small_size, clubMemberList);
+            Bitmap bmp = Bitmap.createScaledBitmap(members.get(position).getIcon().getImg(),
+                    px, px, false);
+            holder.userImg.setImageBitmap(bmp);
 
-        holder.userName.setText(members.get(position).getName());
-        holder.userEmail.setText(members.get(position).getEmail());
+            holder.userName.setText(members.get(position).getName());
+            holder.userEmail.setText(members.get(position).getEmail());
 
-        holder.cmlGroup.setTag(position);
-        if(!members.get(position).getEmail().equals(Main.PROFILE.getEmail()) || Main.PROFILE.getStatus() == Main.DEV){
-            holder.cmlGroup.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if((mode != ClubMemberList.ADMINS && isAdmin) ||
-                            (mode == ClubMemberList.ADMINS && isAdmin && Main.PROFILE.getStatus() >= Main.TEACHER)){
-                        EditClubMemberDialog dialog = new EditClubMemberDialog();
-                        dialog.setClubMemberList(clubMemberList);
-                        dialog.setMode(mode);
-                        dialog.setUserProfile(members.get((int) v.getTag()));
-                        dialog.show(clubMemberList.getSupportFragmentManager(), "EditClubMemberDialog");
-                        return true;
-                    }else{
-                        return false;
+            holder.cmlGroup.setTag(position);
+            if (!members.get(position).getEmail().equals(Main.PROFILE.getEmail()) || Main.PROFILE.getStatus() == Main.DEV) {
+                holder.cmlGroup.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if ((mode != ClubMemberList.ADMINS && isAdmin) ||
+                                (mode == ClubMemberList.ADMINS && isAdmin && Main.PROFILE.getStatus() >= Main.TEACHER)) {
+                            EditClubMemberDialog dialog = new EditClubMemberDialog();
+                            dialog.setClubMemberList(clubMemberList);
+                            dialog.setMode(mode);
+                            dialog.setUserProfile(members.get((int) v.getTag()));
+                            dialog.show(clubMemberList.getSupportFragmentManager(), "EditClubMemberDialog");
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
-                }
-            });
+                });
 
-            holder.cmlGroup.setOnClickListener(new View.OnClickListener() {
+                holder.cmlGroup.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //COPY USER'S EMAIL TO CLIPBOARD
+                        ClipboardManager clipboard = (ClipboardManager)
+                                clubMemberList.getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("USER EMAIL", holder.userEmail.getText());
+                        clipboard.setPrimaryClip(clip);
+
+                        Snackbar.make(holder.cmlGroup, "Copied User's Email to Clipboard!", Snackbar.LENGTH_LONG).show();
+                    }
+                });
+            }
+            /*holder.cmlGroup.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //COPY USER'S EMAIL TO CLIPBOARD
-                    ClipboardManager clipboard = (ClipboardManager)
-                            clubMemberList.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("USER EMAIL", holder.userEmail.getText());
-                    clipboard.setPrimaryClip(clip);
-
-                    Snackbar.make(holder.cmlGroup, "Copied User's Email to Clipboard!", Snackbar.LENGTH_LONG).show();
+                    Intent intent = new Intent(clubMemberList, Profile.class);
+                    intent.putExtra("USER_EMAIL", members.get((int) v.getTag()).getEmail());
+                    clubMemberList.startActivity(intent);
                 }
-            });
+            });*/
         }
-        /*holder.cmlGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(clubMemberList, Profile.class);
-                intent.putExtra("USER_EMAIL", members.get((int) v.getTag()).getEmail());
-                clubMemberList.startActivity(intent);
-            }
-        });*/
     }
 
     @Override

@@ -51,10 +51,12 @@ public class RViewAdapter_Icons extends RecyclerView.Adapter<RViewAdapter_Icons.
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(RViewAdapter_Icons.ViewHolder holder, int position) {
-        int px = AppUtils.getDimen(R.dimen.icon_select_size, iconsSelectFragment.getActivity());
-        holder.icon.setImageBitmap(Bitmap.createScaledBitmap(icons.get(position).getImg(), px, px, false));
-        holder.icon.setTag(icons.get(position).getId());
-        holder.icon.setOnClickListener(iconsSelectFragment);
+        if(icons.get(position) != null && icons.get(position).getImg() != null){
+            int px = AppUtils.getDimen(R.dimen.icon_select_size, iconsSelectFragment.getActivity());
+            holder.icon.setImageBitmap(Bitmap.createScaledBitmap(icons.get(position).getImg(), px, px, false));
+            holder.icon.setTag(icons.get(position).getId());
+            holder.icon.setOnClickListener(iconsSelectFragment);
+        }
     }
 
     @Override

@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class RViewAdapter_Clubs extends RecyclerView.Adapter<RViewAdapter_Clubs.
         this.inProfile = inProfile;
 
         //SORT CLUBS USER IS A PART OF BY ALPHABETICAL ORDER
-        this.extraItems.sort(new Comparator<ClubItem>() {
+        Collections.sort(this.extraItems, new Comparator<ClubItem>() {
             @Override
             public int compare(ClubItem o1, ClubItem o2) {
                 for(int i = 0; i < o1.getName().length(); i++){

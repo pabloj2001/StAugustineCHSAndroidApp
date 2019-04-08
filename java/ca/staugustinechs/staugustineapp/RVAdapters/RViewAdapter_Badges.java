@@ -54,7 +54,8 @@ public class RViewAdapter_Badges extends RecyclerView.Adapter<RViewAdapter_Badge
     public void onBindViewHolder(RViewAdapter_Badges.ViewHolder holder, int position) {
         Bitmap img = badgeItems.get(position).getImg();
         if (img != null) {
-            holder.badgeImg.setImageBitmap(img);
+            int size = AppUtils.getDimen(R.dimen.badge_size, activity);
+            holder.badgeImg.setImageBitmap(Bitmap.createScaledBitmap(img, size, size, false));
         } else {
             holder.badgeImg.setVisibility(View.GONE);
         }

@@ -1,6 +1,8 @@
 package ca.staugustinechs.staugustineapp.RVAdapters;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -9,9 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -33,11 +37,14 @@ import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.DialogFragments.SuperVoteDialog;
 import ca.staugustinechs.staugustineapp.Fragments.SongsFragment;
 import ca.staugustinechs.staugustineapp.Objects.SongItem;
+import ca.staugustinechs.staugustineapp.Objects.UserProfile;
 import ca.staugustinechs.staugustineapp.R;
 
 public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.ViewHolder> {
     private List<SongItem> songItems;
     private SongsFragment songsFragment;
+    private boolean upvoting;
+    private Map<String, UserProfile> userMap = new HashMap<String, UserProfile>();
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -47,7 +54,9 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
         TextView songTitle;
         TextView songArtist;
         TextView songUpvotes;
-        RelativeLayout upvoteGroup;
+        RelativeLayout upvoteGroup, songGroup;
+        ImageView suggestorImg;
+        TextView suggestor;
 
         public ViewHolder(View v) {
             super(v);
@@ -55,6 +64,9 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
             songArtist = (TextView) itemView.findViewById(R.id.songArtist);
             songUpvotes = (TextView) itemView.findViewById(R.id.songUpvotes);
             upvoteGroup = (RelativeLayout) itemView.findViewById(R.id.upvoteGroup);
+            songGroup = itemView.findViewById(R.id.songSongGroup);
+            suggestorImg = itemView.findViewById(R.id.songSuggestorImg);
+            suggestor = (TextView) itemView.findViewById(R.id.songSuggestor);
         }
     }
 
@@ -63,46 +75,7 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
         this.songItems = songItems;
         this.songsFragment = songsFragment;
 
-        if(songItems != null && songItems.size() > 0){
-            if(songsFragment.UPVOTES == null || songsFragment.SUPERVOTES == null){
-                songsFragment.loadUpvotes(songItems);
-            }
-
-            for(SongItem song : songItems){
-                if(songsFragment.SUPERVOTES.contains(song.getId())){
-                    song.setSuperVoted(true);
-                }else if(songsFragment.UPVOTES.contains(song.getId())){
-                    song.setClicked(true);
-                }
-            }
-
-            boolean exists = false;
-            for(String songId : songsFragment.SUPERVOTES){
-                for(SongItem song : songItems){
-                    if(song.getId().equals(songId)){
-                        exists = true;
-                        break;
-                    }
-                }
-
-                if(!exists){
-                    songsFragment.SUPERVOTES.remove(songId);
-                }
-            }
-
-            for(String songId : songsFragment.UPVOTES){
-                for(SongItem song : songItems){
-                    if(song.getId().equals(songId)){
-                        exists = true;
-                        break;
-                    }
-                }
-
-                if(!exists){
-                    songsFragment.UPVOTES.remove(songId);
-                }
-            }
-        }
+        loadSongUpvotes();
     }
 
     // Create new views (invoked by the layout manager)
@@ -116,7 +89,7 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final RViewAdapter_Songs.ViewHolder holder, final int position) {
+    public synchronized void onBindViewHolder(final RViewAdapter_Songs.ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         SongItem songItem = songItems.get(position);
@@ -131,6 +104,7 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
         }else if(songItem.isClicked()){
             changeColors(holder.upvoteGroup, android.R.color.holo_green_light);
         }else{
+            changeColors(holder.upvoteGroup, android.R.color.black);
             holder.upvoteGroup.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -153,15 +127,75 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
             holder.upvoteGroup.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SongItem songItem = songItems.get((int) v.getTag());
-                    if(songItem.isClicked()){
-                        upvote(songItem, -1, v);
-                    }else{
-                        upvote(songItem, 1, v);
+                    if(!upvoting){
+                        //WE'RE IN THE PROCESS OF UPVOTING
+                        upvoting = true;
+
+                        //GET THE SONG USER WANTS TO UPVOTE/UNVOTE
+                        SongItem songItem = songItems.get((int) v.getTag());
+                        //UPVOTE OR UNVOTE IT
+                        if(songItem.isClicked()){
+                            upvote(songItem, -1, v);
+                        }else{
+                            upvote(songItem, 1, v);
+                        }
+
+                        //CHANGE TO TRANSITION COLOR
+                        changeColors(v, android.R.color.holo_orange_light);
                     }
-                    changeColors(v, android.R.color.holo_orange_light);
                 }
             });
+        }
+
+        holder.songGroup.setTag(position);
+        if(Main.PROFILE.getStatus() >= Main.TEACHER){
+            holder.songGroup.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(final View v) {
+                    if(songsFragment.getActivity() != null){
+                        AlertDialog.Builder builder = new AlertDialog.Builder(songsFragment.getActivity());
+                        //CREATE "DELETE SONG" BUTTON POP UP
+                        builder.setItems(new String[]{"Delete Song"}, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(songsFragment.getActivity() != null){
+                                    //CREATE ASK DELETE SONG DIALOG
+                                    AlertDialog.Builder builder2 = new AlertDialog.Builder(songsFragment.getActivity());
+                                    builder2.setTitle("Delete Song");
+                                    builder2.setMessage("Do you wish to delete \"" +
+                                            songItems.get((int) v.getTag()).getTitle() + "\"?");
+                                    builder2.setNegativeButton("No!", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                    builder2.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            //DELETE THE SONG
+                                            songsFragment.removeSong(songItems.get((int) v.getTag()).getId());
+                                        }
+                                    });
+                                    builder2.create().show();
+                                }
+                            }
+                        });
+                        builder.create().show();
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        //DISPLAY THE USER THAT REQUESTED THE SONG IF AVAILABLE
+        if(userMap.containsKey(songItem.getSuggestor())){
+            UserProfile user = userMap.get(songItem.getSuggestor());
+            holder.suggestorImg.setImageBitmap(user.getIcon().getImg());
+            holder.suggestor.setText(user.getName());
+            holder.suggestorImg.setVisibility(View.VISIBLE);
+            holder.suggestor.setVisibility(View.VISIBLE);
         }
     }
 
@@ -200,6 +234,8 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
                         Snackbar.make(view, "Couldn't upvote right now :(", Snackbar.LENGTH_LONG).show();
                         changeColors(view, android.R.color.black);
                     }
+                    //UPVOTE IS COMPLETE
+                    upvoting = false;
                 }
             });
         }
@@ -210,6 +246,72 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
                 .setTint(songsFragment.getActivity().getColor(color));
         ((TextView) ((RelativeLayout) v).getChildAt(1))
                 .setTextColor(songsFragment.getActivity().getColor(color));
+    }
+
+    public void updateSongs(List<SongItem> songs){
+        this.songItems = songs;
+        loadSongUpvotes();
+        this.notifyDataSetChanged();
+    }
+
+    public void addSuggestors(List<UserProfile> users) {
+        if(users != null){
+            for(UserProfile user : users){
+                userMap.put(user.getUid(), user);
+            }
+            this.notifyDataSetChanged();
+        }
+    }
+
+    public boolean cointainsSuggestor(String user){
+        return userMap.containsKey(user);
+    }
+
+    public synchronized void loadSongUpvotes(){
+        if(songItems != null && songItems.size() > 0){
+            if(songsFragment.UPVOTES == null || songsFragment.SUPERVOTES == null){
+                songsFragment.loadUpvotes(songItems);
+            }
+
+            for(SongItem song : songItems){
+                if(songsFragment.SUPERVOTES.contains(song.getId())){
+                    song.setSuperVoted(true);
+                }else if(songsFragment.UPVOTES.contains(song.getId())){
+                    song.setClicked(true);
+                }else{
+                    song.setSuperVoted(false);
+                    song.setClicked(false);
+                }
+            }
+
+            boolean exists = false;
+            for(String songId : songsFragment.SUPERVOTES){
+                for(SongItem song : songItems){
+                    if(song.getId().equals(songId)){
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if(!exists){
+                    songsFragment.SUPERVOTES.remove(songId);
+                }
+            }
+
+            exists = false;
+            for(String songId : songsFragment.UPVOTES){
+                for(SongItem song : songItems){
+                    if(song.getId().equals(songId)){
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if(!exists){
+                    songsFragment.UPVOTES.remove(songId);
+                }
+            }
+        }
     }
 
     @Override

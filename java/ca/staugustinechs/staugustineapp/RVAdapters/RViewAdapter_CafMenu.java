@@ -17,6 +17,7 @@ import com.google.firebase.functions.HttpsCallableResult;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +47,7 @@ public class RViewAdapter_CafMenu extends RecyclerView.Adapter<RViewAdapter_CafM
 
     public RViewAdapter_CafMenu(List<CafMenuItem> items) {
         this.items = items;
-        this.items.sort(new Comparator<CafMenuItem>() {
+        Collections.sort(this.items, new Comparator<CafMenuItem>() {
             @Override
             public int compare(CafMenuItem o1, CafMenuItem o2) {
                 return o1.getName().compareTo(o2.getName());

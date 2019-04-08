@@ -13,17 +13,22 @@ import com.google.common.collect.Lists;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ca.staugustinechs.staugustineapp.Activities.ClubDetails;
 import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.Objects.ClubAnnouncement;
+import ca.staugustinechs.staugustineapp.Objects.UserProfile;
 import ca.staugustinechs.staugustineapp.R;
 
 public class RViewAdapter_ClubAnnouns extends RecyclerView.Adapter<RViewAdapter_ClubAnnouns.ViewHolder> {
     private List<ClubAnnouncement> extraAnnounItems;
     private ClubDetails clubDetails;
+    private Map<String, UserProfile> userMap = new HashMap<String, UserProfile>();
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -31,8 +36,9 @@ public class RViewAdapter_ClubAnnouns extends RecyclerView.Adapter<RViewAdapter_
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         View cdGroup;
-        ImageView cdAnnounImg;
-        TextView cdAnnounTitle, cdAnnounContent, cdAnnounDate, cdAnnounClub, cdAnnounImgError;
+        ImageView cdAnnounImg, cdAnnounCreatorImg;
+        TextView cdAnnounTitle, cdAnnounContent, cdAnnounDate,
+                cdAnnounClub, cdAnnounImgError, cdAnnounCreator;
 
         public ViewHolder(View v) {
             super(v);
@@ -47,6 +53,8 @@ public class RViewAdapter_ClubAnnouns extends RecyclerView.Adapter<RViewAdapter_
             cdAnnounClub.setBackgroundColor(AppUtils.ACCENT_COLOR);
             cdAnnounImgError = itemView.findViewById(R.id.cdAnnounImgError);
             cdAnnounImgError.setTextColor(AppUtils.PRIMARY_COLOR);
+            cdAnnounCreatorImg = itemView.findViewById(R.id.cdAnnounCreatorImg);
+            cdAnnounCreator = itemView.findViewById(R.id.cdAnnounCreator);
         }
     }
 
@@ -68,7 +76,9 @@ public class RViewAdapter_ClubAnnouns extends RecyclerView.Adapter<RViewAdapter_
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(RViewAdapter_ClubAnnouns.ViewHolder holder, int position) {
-        holder.cdGroup.setTag(extraAnnounItems.get(position).getId());
+        ClubAnnouncement announ = extraAnnounItems.get(position);
+
+        holder.cdGroup.setTag(announ.getId());
 
         if(clubDetails != null) {
             if(clubDetails.isAdmin()) {
@@ -81,11 +91,11 @@ public class RViewAdapter_ClubAnnouns extends RecyclerView.Adapter<RViewAdapter_
                 });
             }
         }else{
-            holder.cdAnnounClub.setText(extraAnnounItems.get(position).getClubName());
+            holder.cdAnnounClub.setText(announ.getClubName());
             holder.cdAnnounClub.setVisibility(View.VISIBLE);
         }
 
-        Bitmap img = extraAnnounItems.get(position).getImg();
+        Bitmap img = announ.getImg();
         if(img != null){
             if(clubDetails != null){
                 holder.cdAnnounImg.setImageBitmap(img);
@@ -99,23 +109,32 @@ public class RViewAdapter_ClubAnnouns extends RecyclerView.Adapter<RViewAdapter_
         }
 
         DateFormat dateFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy");
-        String dateStr = dateFormat.format(extraAnnounItems.get(position).getDate());
+        String dateStr = dateFormat.format(announ.getDate());
         holder.cdAnnounDate.setText(dateStr);
 
-        holder.cdAnnounTitle.setText(extraAnnounItems.get(position).getTitle());
+        holder.cdAnnounTitle.setText(announ.getTitle());
 
-        String content = extraAnnounItems.get(position).getContent();
+        String content = announ.getContent();
         if(content != null && !content.isEmpty()){
             holder.cdAnnounContent.setText(content);
             holder.cdAnnounContent.setVisibility(View.VISIBLE);
         }else{
             holder.cdAnnounContent.setVisibility(View.GONE);
         }
+
+        //DISPLAY THE USER THAT CREATED THE ANNOUNCEMENT IF AVAILABLE
+        if(userMap.containsKey(announ.getCreator())){
+            UserProfile user = userMap.get(announ.getCreator());
+            holder.cdAnnounCreatorImg.setImageBitmap(user.getIcon().getImg());
+            holder.cdAnnounCreator.setText(user.getName());
+            holder.cdAnnounCreatorImg.setVisibility(View.VISIBLE);
+            holder.cdAnnounCreator.setVisibility(View.VISIBLE);
+        }
     }
 
     public void addItems(List<ClubAnnouncement> items){
         this.extraAnnounItems.addAll(items);
-        this.extraAnnounItems.sort(new Comparator<ClubAnnouncement>() {
+        Collections.sort(this.extraAnnounItems, new Comparator<ClubAnnouncement>() {
             @Override
             public int compare(ClubAnnouncement o1, ClubAnnouncement o2) {
                 if(o1.getDate().before(o2.getDate())){
@@ -127,6 +146,24 @@ public class RViewAdapter_ClubAnnouns extends RecyclerView.Adapter<RViewAdapter_
                 }
             }
         });
+        this.notifyDataSetChanged();
+    }
+
+    public void addCreators(List<UserProfile> users) {
+        if(users != null){
+            for(UserProfile user : users){
+                userMap.put(user.getUid(), user);
+            }
+            this.notifyDataSetChanged();
+        }
+    }
+
+    public boolean containsCreator(String user){
+        return userMap.containsKey(user);
+    }
+
+    public void setAnnouncements(List<ClubAnnouncement> announcements) {
+        this.extraAnnounItems = Lists.reverse(announcements);
         this.notifyDataSetChanged();
     }
 
