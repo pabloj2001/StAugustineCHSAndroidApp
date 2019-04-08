@@ -28,10 +28,10 @@ import ca.staugustinechs.staugustineapp.Objects.ClubAnnouncement;
 
 public class GetClubAnnounsTask extends AsyncTask<String, Void, List<ClubAnnouncement>> implements OnFailureListener {
 
-    Activity activity;
-    String clubId;
-    ClubAnnounGetter getter;
-    boolean isFinished = false;
+    private Activity activity;
+    private String clubId;
+    private ClubAnnounGetter getter;
+    private boolean isFinished = false;
 
     public GetClubAnnounsTask(String clubId, Activity activity, ClubAnnounGetter getter){
         this.activity = activity;

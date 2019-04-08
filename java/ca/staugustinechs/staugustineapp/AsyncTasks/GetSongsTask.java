@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class GetSongsTask extends AsyncTask<String, Void, List<SongItem>> implem
                     songs.add(new SongItem(doc.getId(), doc.getData()));
                 }
 
-                songs.sort(new Comparator<SongItem>() {
+                Collections.sort(songs, new Comparator<SongItem>() {
                     @Override
                     public int compare(SongItem o1, SongItem o2) {
                         if(o1.getUpvotes() > o2.getUpvotes()){

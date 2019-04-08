@@ -75,7 +75,7 @@ public class GetProfileIconsTask extends AsyncTask<Integer, Void, List<ProfileIc
             if(type.equals(IconGetType.SINGLE)){
                 Bitmap img = getPic(ints[0]);
                 icons.add(new ProfileIcon(ints[0], img,
-                        Math.toIntExact(rarities.get(ints[0] < 0 ? 0 : ints[0])),
+                        AppUtils.longToInt(rarities.get(ints[0] < 0 ? 0 : ints[0])),
                         owned.contains(ints[0])));
                 return icons;
             }else if(type.equals(IconGetType.MULTIPLE)){
@@ -84,14 +84,14 @@ public class GetProfileIconsTask extends AsyncTask<Integer, Void, List<ProfileIc
                         Long cost = rarities.get(iconId < 0 ? 0 : iconId);
                         if (cost != null) {
                             Bitmap img = getPic(iconId);
-                            icons.add(new ProfileIcon(iconId, img, Math.toIntExact(cost),
+                            icons.add(new ProfileIcon(iconId, img, AppUtils.longToInt(cost),
                                     owned.contains(iconId)));
                         }
                     }
                 }
             }else if(type.equals(IconGetType.BYRARITY)){
                 for (int a = 0; a < rarities.size(); a++) {
-                    int rarity = Math.toIntExact(rarities.get(a));
+                    int rarity = AppUtils.longToInt(rarities.get(a));
                     if (rarity == ints[0]) {
                         Bitmap img = getPic(a);
                         icons.add(new ProfileIcon(a, img, rarity, owned.contains(a)));
@@ -101,7 +101,7 @@ public class GetProfileIconsTask extends AsyncTask<Integer, Void, List<ProfileIc
                 for(int i = 0; i < rarities.size(); i++){
                     if(rarities.get(i) != null){
                         Bitmap img = getPic(i);
-                        icons.add(new ProfileIcon(i, img, Math.toIntExact(rarities.get(i)),
+                        icons.add(new ProfileIcon(i, img, AppUtils.longToInt(rarities.get(i)),
                                 owned.contains(i)));
                     }
                 }
@@ -131,7 +131,7 @@ public class GetProfileIconsTask extends AsyncTask<Integer, Void, List<ProfileIc
 
                 if (uriTask.isSuccessful()) {
                     try {
-                        int px = AppUtils.getDeviceDimen(R.dimen.icon_big_size, activity);
+                        int px = AppUtils.getDimen(R.dimen.icon_big_size, activity);
                         img = Picasso.with(activity)
                                 .load(uriTask.getResult())
                                 .transform(new CropCircleTransformation())

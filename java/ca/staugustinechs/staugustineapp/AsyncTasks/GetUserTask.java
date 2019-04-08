@@ -27,15 +27,19 @@ public class GetUserTask extends AsyncTask<String, Void, List<UserProfile>> impl
     private String email;
     private List<String> users;
     private boolean getImg = true;
+    private boolean fetchAll = false;
 
     public GetUserTask(Activity activity, String email){
         this.activity = activity;
         this.email = email;
     }
 
-    public GetUserTask(Activity activity, List<String> users){
+    public GetUserTask(Activity activity, List<String> users, boolean... fetchAll){
         this.activity = activity;
         this.users = users;
+        if(fetchAll.length > 0){
+            this.fetchAll = fetchAll[0];
+        }
     }
 
     public void dontGetImg(){
@@ -64,16 +68,29 @@ public class GetUserTask extends AsyncTask<String, Void, List<UserProfile>> impl
         if(userTask.isSuccessful()){
             List<DocumentSnapshot> docs = userTask.getResult().getDocuments();
             if(docs.size() > 0){
-                UserProfile user = new UserProfile(docs.get(0).getId(), docs.get(0).getData());
+                String docId = docs.get(0).getId();
 
-                if(getImg){
-                    GetProfileIconsTask getProfileIconsTask = new GetProfileIconsTask(activity,
-                            GetProfileIconsTask.IconGetType.SINGLE);
-                    List<ProfileIcon> icons = getProfileIconsTask.getProfileIcons(new Integer[]{user.getProfilePic()});
-                    user.setIcon(icons.get(0));
+                Task<DocumentSnapshot> userInfoTask = FirebaseFirestore.getInstance()
+                        .collection("users").document(docId)
+                        .collection("info").document("vital").get();
+
+                while (!userInfoTask.isComplete()) { }
+
+                if(userInfoTask.isSuccessful()){
+                    DocumentSnapshot infoDoc = userInfoTask.getResult();
+                    if(infoDoc.exists()) {
+                        UserProfile user = new UserProfile(docId, infoDoc.getData(), docs.get(0).getData());
+
+                        if(getImg){
+                            GetProfileIconsTask getProfileIconsTask = new GetProfileIconsTask(activity,
+                                    GetProfileIconsTask.IconGetType.SINGLE);
+                            List<ProfileIcon> icons = getProfileIconsTask.getProfileIcons(new Integer[]{user.getProfilePic()});
+                            user.setLocalIcon(icons.get(0));
+                        }
+
+                        return Arrays.asList(user);
+                    }
                 }
-
-                return Arrays.asList(user);
             }
         }
 
@@ -87,17 +104,34 @@ public class GetUserTask extends AsyncTask<String, Void, List<UserProfile>> impl
         if(!users.isEmpty()) {
             for (String userId : users) {
                 if(userId != null && !userId.isEmpty()){
-                    Task<DocumentSnapshot> userTask = FirebaseFirestore.getInstance()
-                            .collection("users").document(userId).get();
+                    Task<DocumentSnapshot> userInfoTask = FirebaseFirestore.getInstance()
+                            .collection("users").document(userId)
+                            .collection("info").document("vital").get();
 
-                    while (!userTask.isComplete()) { }
+                    while (!userInfoTask.isComplete()) { }
 
-                    if (userTask.isSuccessful()) {
-                        DocumentSnapshot doc = userTask.getResult();
-                        if(doc.exists()){
-                            UserProfile user = new UserProfile(doc.getId(), doc.getData());
-                            pics.add(user.getProfilePic());
-                            userList.add(user);
+                    if(userInfoTask.isSuccessful()){
+                        DocumentSnapshot infoDoc = userInfoTask.getResult();
+                        if(infoDoc.exists()){
+                            if(fetchAll){
+                                Task<DocumentSnapshot> userTask = FirebaseFirestore.getInstance()
+                                        .collection("users").document(userId).get();
+
+                                while (!userTask.isComplete()) { }
+
+                                if (userTask.isSuccessful()) {
+                                    DocumentSnapshot doc = userTask.getResult();
+                                    if(doc.exists()){
+                                        UserProfile user = new UserProfile(userId, infoDoc.getData(), doc.getData());
+                                        pics.add(user.getProfilePic());
+                                        userList.add(user);
+                                    }
+                                }
+                            }else{
+                                UserProfile user = new UserProfile(userId, infoDoc.getData());
+                                pics.add(user.getProfilePic());
+                                userList.add(user);
+                            }
                         }
                     }
                 }
@@ -109,7 +143,7 @@ public class GetUserTask extends AsyncTask<String, Void, List<UserProfile>> impl
                 List<ProfileIcon> icons = getProfileIconsTask.getProfileIcons(pics.toArray(new Integer[]{}));
 
                 for (int a = 0; a < userList.size(); a++) {
-                    userList.get(a).setIcon(icons.get(a));
+                    userList.get(a).setLocalIcon(icons.get(a));
                 }
             }
         }

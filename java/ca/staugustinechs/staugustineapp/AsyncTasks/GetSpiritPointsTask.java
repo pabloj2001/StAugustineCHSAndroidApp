@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.Fragments.CafMenuFragment;
 import ca.staugustinechs.staugustineapp.Fragments.SpiritMetersFragment;
 import ca.staugustinechs.staugustineapp.Objects.CafMenuItem;
@@ -35,10 +36,10 @@ public class GetSpiritPointsTask extends AsyncTask<String, Void, int[]> {
             String[] years = ((List<String>) doc.get("years")).toArray(new String[]{});
 
             int[] points = new int[4];
-            points[0] = Math.toIntExact(doc.getLong(years[3]));
-            points[1] = Math.toIntExact(doc.getLong(years[2]));
-            points[2] = Math.toIntExact(doc.getLong(years[1]));
-            points[3] = Math.toIntExact(doc.getLong(years[0]));
+            points[0] = AppUtils.longToInt(doc.getLong(years[3]));
+            points[1] = AppUtils.longToInt(doc.getLong(years[2]));
+            points[2] = AppUtils.longToInt(doc.getLong(years[1]));
+            points[3] = AppUtils.longToInt(doc.getLong(years[0]));
 
             return points;
         }

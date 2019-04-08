@@ -22,7 +22,6 @@ public class TagCreationTask extends AsyncTask<String, Void, Bitmap> {
 
     private Bitmap logo;
     private TitanTagFragment tagFragment;
-    private final int cornerSize = 280;
     private boolean finished = false;
 
     public TagCreationTask(Bitmap logo, TitanTagFragment tagFragment){
@@ -51,27 +50,25 @@ public class TagCreationTask extends AsyncTask<String, Void, Bitmap> {
             int startY = (bmp.getHeight() - logo.getHeight()) / 2;
             int startX = (bmp.getWidth() - logo.getWidth()) / 2;
 
+            int[] pixels = new int[width * height];
             if (tagFragment != null && !tagFragment.isDetached() && tagFragment.isVisible()) {
-                int primary = AppUtils.PRIMARY_COLOR;
                 int accent = AppUtils.ACCENT_COLOR;
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
-                        if ((y >= startY && x >= startX) &&
+                        if (AppUtils.SHOW_LOGO_IN_TT && (y >= startY && x >= startX) &&
                                 (y < startY + logo.getHeight() && x < startX + logo.getWidth())) {
                             int pixel = logo.getPixel(x - startX, y - startY);
                             if (pixel != Color.TRANSPARENT) {
-                                bmp.setPixel(x, y, pixel);
+                                pixels[(y * width) + x] = pixel;
                             } else {
-                                bmp.setPixel(x, y, bitMatrix.get(x, y) ? accent : Color.WHITE);
+                                pixels[(y * width) + x] = bitMatrix.get(x, y) ? accent : Color.WHITE;
                             }
-                        } /*else if ((y <= cornerSize && (x <= cornerSize || x >= 1000 - cornerSize)) ||
-                                (y >= 1000 - cornerSize && x <= cornerSize)) {
-                            bmp.setPixel(x, y, bitMatrix.get(x, y) ? primary : Color.WHITE);
-                        }*/ else {
-                            bmp.setPixel(x, y, bitMatrix.get(x, y) ? accent : Color.WHITE);
+                        } else {
+                            pixels[(y * width) + x] = bitMatrix.get(x, y) ? accent : Color.WHITE;
                         }
                     }
                 }
+                bmp.setPixels(pixels, 0, width, 0, 0, width, height);
             }
 
             return bmp;

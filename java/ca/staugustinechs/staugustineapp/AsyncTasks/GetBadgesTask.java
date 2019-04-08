@@ -30,10 +30,10 @@ import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implements OnFailureListener {
 
-    ClubDetails clubDetails;
-    ClubItem club;
-    Profile profile;
-    Activity activity;
+    private ClubDetails clubDetails;
+    private ClubItem club;
+    private Profile profile;
+    private Activity activity;
 
     public GetBadgesTask(ClubDetails clubDetails){
         this.clubDetails = clubDetails;
