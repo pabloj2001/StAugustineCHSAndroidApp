@@ -65,15 +65,23 @@ public class TitanTagFragment extends Fragment implements MenuItem.OnMenuItemCli
         }
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.stalogo);
-        logo = Bitmap.createScaledBitmap(bitmap, 300, 300, false);
+        logo = Bitmap.createScaledBitmap(bitmap, 160, 160, false);
 
         onHiddenChanged(false);
     }
 
     private void updateTitanTag(){
         if(task == null || task.isFinished()) {
+            String email;
+            if(AppUtils.ADD_K12_TO_TT){
+                email = Main.PROFILE.getEmail();
+            }else{
+                email = Main.PROFILE.getEmail().split("@")[0];
+            }
+
             task = new TagCreationTask(logo, this);
-            task.execute(TitanTagEncryption.encrypt(Main.PROFILE.getEmail().split("@")[0]));
+           // task.execute("will.smith19");
+            task.execute(TitanTagEncryption.encrypt(email));
         }
 
         titanTag.postDelayed(new Runnable() {
@@ -81,7 +89,7 @@ public class TitanTagFragment extends Fragment implements MenuItem.OnMenuItemCli
             public void run() {
                 if (!isHidden() && titanTag != null) {
                     if(ttDebugText !=  null){
-                        ttDebugText.setText(TitanTagEncryption.encrypt(Main.PROFILE.getEmail().split("@")[0])
+                        ttDebugText.setText(TitanTagEncryption.encrypt(Main.PROFILE.getEmail())
                                 + "\n" + TitanTagEncryption.getTime());
                     }
                     updateTitanTag();

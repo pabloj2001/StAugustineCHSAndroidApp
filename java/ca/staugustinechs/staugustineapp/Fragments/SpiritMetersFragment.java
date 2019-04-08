@@ -1,6 +1,7 @@
 package ca.staugustinechs.staugustineapp.Fragments;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -72,19 +73,27 @@ public class SpiritMetersFragment extends Fragment {
         //SET MAX AND UPDATE PROGRESS
         grade9text.setText("Grade 9 - " + points[0] + " Points");
         grade9bar.setMax(highest);
-        grade9bar.setProgress(points[0], true);
 
         grade10text.setText("Grade 10 - " + points[1] + " Points");
         grade10bar.setMax(highest);
-        grade10bar.setProgress(points[1], true);
 
         grade11text.setText("Grade 11 - " + points[2] + " Points");
         grade11bar.setMax(highest);
-        grade11bar.setProgress(points[2], true);
 
         grade12text.setText("Grade 12 - " + points[3] + " Points");
         grade12bar.setMax(highest);
-        grade12bar.setProgress(points[3], true);
+
+        if(Build.VERSION.SDK_INT > 23) {
+            grade9bar.setProgress(points[0], true);
+            grade10bar.setProgress(points[1], true);
+            grade11bar.setProgress(points[2], true);
+            grade12bar.setProgress(points[3], true);
+        }else{
+            grade9bar.setProgress(points[0]);
+            grade10bar.setProgress(points[1]);
+            grade11bar.setProgress(points[2]);
+            grade12bar.setProgress(points[3]);
+        }
     }
 
     public void setOffline(){

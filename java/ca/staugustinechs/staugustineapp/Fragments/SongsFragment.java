@@ -1,5 +1,6 @@
 package ca.staugustinechs.staugustineapp.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -22,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -45,6 +47,7 @@ import java.util.Map;
 import ca.staugustinechs.staugustineapp.Activities.Main;
 import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetSongsTask;
+import ca.staugustinechs.staugustineapp.AsyncTasks.GetUserTask;
 import ca.staugustinechs.staugustineapp.DialogFragments.RequestSongDialog;
 import ca.staugustinechs.staugustineapp.DialogFragments.SuperVoteDialog;
 import ca.staugustinechs.staugustineapp.Objects.UserProfile;
@@ -64,7 +67,8 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
     private View songsGroup;
     private RecyclerView rv;
     private SwipeRefreshLayout refreshLayout;
-    private FloatingActionButton requestSongBtn; //superVoteBtn
+    private FloatingActionButton requestSongBtn;
+    private RViewAdapter_Songs adapter;
 
     @Nullable
     @Override
@@ -85,8 +89,17 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
         songsGroup = getView().findViewById(R.id.songsGroup);
         requestSongBtn = (FloatingActionButton) getView().findViewById(R.id.addSong);
         requestSongBtn.setBackgroundTintList(AppUtils.ACCENT_COLORSL);
-       /* superVoteBtn = (FloatingActionButton) getView().findViewById(R.id.superVote);
-        superVoteBtn.setColorFilter(AppUtils.ACCENT_COLOR);*/
+
+        //IF SONG THEME EXISTS SHOW THEME BANNER
+        if(AppUtils.SONG_REQUEST_THEME != null && !AppUtils.SONG_REQUEST_THEME.isEmpty()){
+            TextView theme = getView().findViewById(R.id.songsTheme);
+            theme.setText("THEME: " + AppUtils.SONG_REQUEST_THEME);
+            theme.setTextColor(AppUtils.ACCENT_COLOR);
+            theme.setBackgroundColor(AppUtils.PRIMARY_DARK_COLOR);
+
+            refreshLayout.setPadding(0, 24, 0, 0);
+            theme.setVisibility(View.VISIBLE);
+        }
 
         if(AppUtils.isNetworkAvailable(this.getActivity())){
             rv = (RecyclerView) getView().findViewById(R.id.rv);
@@ -100,11 +113,11 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
             };
             rv.setLayoutManager(layoutManager);
 
+            //GET ALL SONGS FROM DB
             songsTask = new GetSongsTask(this);
             songsTask.execute();
 
             requestSongBtn.setOnClickListener(this);
-            //superVoteBtn.setOnClickListener(this);
         }else{
             setOffline();
         }
@@ -126,29 +139,55 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
                 Snackbar.make(getView(), "Sorry there can only be " + AppUtils.MAX_SONGS + " songs requested at once.",
                         Snackbar.LENGTH_LONG).show();
             }
-        }/*else if(v.equals(superVoteBtn)){
-            AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
-            builder.setTitle("Super Vote!");
-            builder.setIcon(R.drawable.ic_baseline_whatshot_24px);
-            builder.setMessage("You can Super Vote a song by holding its vote count for a sec.");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-            builder.create().show();
-        }*/
+        }
     }
 
-    public void updateSongs(List<SongItem> s) {
-        if(s != null){
-            RViewAdapter_Songs adapter = new RViewAdapter_Songs(s, this);
-            rv.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
+    public synchronized void updateSongs(List<SongItem> songs) {
+        if(songs != null){
+            if(adapter == null){
+                adapter = new RViewAdapter_Songs(songs, this);
+                if(rv != null){
+                    rv.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                }
+            }else{
+                adapter.updateSongs(songs);
+            }
+
+            if(AppUtils.SHOW_USERS_ON_SONGS){
+                //GET USERS FOR EACH SONG
+                List<String> users = new ArrayList<String>();
+                for(SongItem song : songs){
+                    if(!adapter.cointainsSuggestor(song.getSuggestor())){
+                        users.add(song.getSuggestor());
+                    }
+                }
+
+                if(users.size() > 0){
+                    refreshLayout.setEnabled(false);
+                    refreshLayout.setRefreshing(true);
+                    //ONCE AGAIN DON'T DO THIS
+                    @SuppressLint("StaticFieldLeak")
+                    GetUserTask task = new GetUserTask(this.getActivity(), users){
+                        @Override
+                        protected void onPostExecute(List<UserProfile> users) {
+                            adapter.addSuggestors(users);
+                            refreshLayout.setEnabled(true);
+                            refreshLayout.setRefreshing(false);
+                        }
+                    };
+                    task.execute();
+                }else{
+                    refreshLayout.setEnabled(true);
+                    refreshLayout.setRefreshing(false);
+                }
+            }else{
+                refreshLayout.setEnabled(true);
+                refreshLayout.setRefreshing(false);
+            }
 
             View error = getView().findViewById(R.id.songsError);
-            if(s.size() > 0){
+            if(songs.size() > 0){
                 //MAKE SONGS VISIBLE
                 songsGroup.setVisibility(View.VISIBLE);
                 //MAKE ERROR INVISIBLE
@@ -163,9 +202,6 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
             layout.removeView(offline);
             //MAKE BUTTON VISIBLE
             ((View) requestSongBtn).setVisibility(View.VISIBLE);
-
-            refreshLayout.setEnabled(true);
-            refreshLayout.setRefreshing(false);
         }else{
             setOffline();
         }
@@ -192,7 +228,7 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
         data.put("date", new Timestamp(new Date()));
         data.put("upvotes", 0);
 
-        Main.PROFILE.updatePoints(-AppUtils.REQUEST_SONG_COST, null, SongsFragment.this);
+        Main.PROFILE.updatePoints(-AppUtils.REQUEST_SONG_COST, false, null, SongsFragment.this);
 
         FirebaseFirestore.getInstance().collection("songs").add(data)
                 .addOnFailureListener(SongsFragment.this)
@@ -213,7 +249,7 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
                 });
     }
 
-    public void superVote(final int vote, final String songId){
+    public void superVote(final int cost, final int vote, final String songId){
         final DocumentReference ref = FirebaseFirestore.getInstance()
                 .collection("songs").document(songId);
         FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<Void>() {
@@ -226,13 +262,18 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
         }).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if (getView() != null) {
-                    if (task.isSuccessful()) {
+                if (task.isSuccessful()) {
+                    Main.PROFILE.updatePoints(-cost, false, null, null);
+
+                    if (getView() != null) {
                         Snackbar.make(getView(), "You super voted a song! :D", Snackbar.LENGTH_LONG).show();
-                        SUPERVOTES.add(songId);
-                        refresh();
-                        saveUpvotes();
-                    } else {
+                    }
+
+                    SUPERVOTES.add(songId);
+                    refresh();
+                    saveUpvotes();
+                } else {
+                    if (getView() != null) {
                         Snackbar.make(getView(), "Couldn't super vote right now :(", Snackbar.LENGTH_LONG).show();
                     }
                 }
@@ -240,7 +281,19 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
         });
     }
 
-    public void loadUpvotes(List<SongItem> songItems){
+    public void removeSong(String songId) {
+        FirebaseFirestore.getInstance().collection("songs")
+                .document(songId).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    onRefresh();
+                }
+            }
+        });
+    }
+
+    public synchronized void loadUpvotes(List<SongItem> songItems){
         File file = new File(this.getActivity().getFilesDir(), UPVOTES_FILE);
         if (file.exists()) {
             Map<String, String> data = AppUtils.loadMapFile(UPVOTES_FILE, this.getActivity());
@@ -286,7 +339,7 @@ public class SongsFragment extends Fragment implements View.OnClickListener, OnF
         }
     }
 
-    public void saveUpvotes(){
+    public synchronized void saveUpvotes(){
         Map<String, String> data = new HashMap<String, String>();
         if (UPVOTES != null && UPVOTES.size() > 0) {
             String upvotesData = AppUtils.combineWithRegex(UPVOTES.toArray(new String[]{}));

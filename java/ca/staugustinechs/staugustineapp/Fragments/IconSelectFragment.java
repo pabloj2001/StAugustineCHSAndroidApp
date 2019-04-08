@@ -24,6 +24,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -128,7 +129,7 @@ public class IconSelectFragment extends Fragment implements View.OnClickListener
         }
 
         //ARRANGE ICONS BY COST
-        this.icons.sort(new Comparator<ProfileIcon>() {
+        Collections.sort(this.icons, new Comparator<ProfileIcon>() {
             @Override
             public int compare(ProfileIcon o1, ProfileIcon o2) {
                 if(o1.getCost() < o2.getCost()){
@@ -167,7 +168,7 @@ public class IconSelectFragment extends Fragment implements View.OnClickListener
     public void purchaseIcon(final ProfileIcon icon){
         Snackbar.make(getView(), "Purchasing icon...", Snackbar.LENGTH_LONG).show();
 
-        Main.PROFILE.updatePoints(-icon.getCost(), null, null);
+        Main.PROFILE.updatePoints(-icon.getCost(), false, null, null);
 
         FirebaseFirestore.getInstance().collection("users").document(Main.PROFILE.getUid())
                 .update("picsOwned", FieldValue.arrayUnion(icon.getId()))
@@ -192,6 +193,7 @@ public class IconSelectFragment extends Fragment implements View.OnClickListener
 
     private void setSelectedIcon(ProfileIcon icon){
         this.selectedIcon = icon;
+        //Bitmap img = Bitmap.createScaledBitmap(icon.getImg(), 600, 600, false);
         ((ImageView) getView().findViewById(R.id.isPreview)).setImageBitmap(icon.getImg());
     }
 

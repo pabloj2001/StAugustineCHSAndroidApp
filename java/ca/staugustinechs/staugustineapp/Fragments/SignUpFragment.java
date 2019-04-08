@@ -187,7 +187,7 @@ public class SignUpFragment extends Fragment {
     }
 
     public static String[] getClasses(LinearLayout layout){
-        if(allCourses != null){
+        if(allCourses != null && layout != null){
             List<EditText> editTexts = new ArrayList<EditText>();
             for(int i = 0; i < layout.getChildCount(); i++){
                 View child = layout.getChildAt(i);

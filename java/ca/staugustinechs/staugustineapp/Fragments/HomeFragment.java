@@ -79,6 +79,7 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     private RecyclerView rv;
     private RViewAdapter_ClubAnnouns rvAdapter;
     private View clubGroup;
+    private TextView announError;
     private boolean newsLoaded = false;
     private boolean requestedRefresh = false;
 
@@ -101,6 +102,7 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
             clubGroup = view.findViewById(R.id.homeClubGroup);
             homeClubLoading = view.findViewById(R.id.homeClubLoading);
             homeClubLoading.getIndeterminateDrawable().setTint(AppUtils.ACCENT_COLOR);
+            announError = view.findViewById(R.id.homeAnnounError);
 
             homeSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.homeSwipeRefresh);
             homeSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -166,33 +168,39 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     }
 
     public void updateAnnouncements(String source){
-        if(!this.isHidden()){
+        if(!this.isHidden() && getView() != null){
             source = source != null && source.contains("<title>St Augustine CHS") ? source : null;
 
             List<NewsItem> newsItems = getNewsItems(source);
-            RViewAdapter_Home adapter = new RViewAdapter_Home(newsItems);
-            announcements.setAdapter(adapter);
+            if (newsItems.size() > 0) {
+                RViewAdapter_Home adapter = new RViewAdapter_Home(newsItems);
+                announcements.setAdapter(adapter);
+                newsLoaded = true;
+            } else if (AppUtils.isNetworkAvailable(this.getActivity())) {
+                newsLoaded = true;
+            } else {
+                setOffline();
+                newsLoaded = false;
+            }
 
             //UPDATE DATE
             Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("EST"));
             //cal.setTimeInMillis(System.currentTimeMillis() + (1000 * 60 * 60 * 24));
-            DateFormat date = new SimpleDateFormat("EEEE, MMMM d, YYYY");
+            DateFormat date = new SimpleDateFormat("EEEE, MMMM d, yyyy");
             String today = date.format(cal.getTime());
 
             TextView dateView = (TextView) getView().findViewById(R.id.date);
             dateView.setText(today);
 
-            if(source != null){
-                updateDay(today);
-                newsLoaded = true;
-                showViews();
-            }
+            updateDay(today);
+            showViews();
         }
     }
 
     @Override
     public void updateAnnouns(List<ClubAnnouncement> rawClubAnnouns) {
-        if(rawClubAnnouns != null && !rawClubAnnouns.isEmpty()){
+        System.out.println("UPDATING CLUB ANNOUNS");
+        if(rawClubAnnouns != null){
             List<ClubAnnouncement> clubAnnouns = new ArrayList<ClubAnnouncement>();
 
             long DAY_IN_MS = 1000 * 60 * 60 * 24;
@@ -203,16 +211,15 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
                 }
             }
 
+            System.out.println("UPDATING CLUB ANNOUNS");
             if(rvAdapter == null){
                 rvAdapter = new RViewAdapter_ClubAnnouns(clubAnnouns, null);
                 rv.setAdapter(rvAdapter);
                 showViews();
-            }else{
-                if(!clubAnnouns.isEmpty()){
-                    rvAdapter.addItems(clubAnnouns);
-                    clubGroup.setVisibility(View.VISIBLE);
-                    homeClubLoading.setVisibility(View.VISIBLE);
-                }
+            }else if(!rawClubAnnouns.isEmpty()){
+                rvAdapter.addItems(clubAnnouns);
+                // clubGroup.setVisibility(View.VISIBLE);
+                //homeClubLoading.setVisibility(View.VISIBLE);
             }
         }
 
@@ -226,28 +233,34 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
 
         if(allFinished){
             homeClubLoading.setVisibility(View.GONE);
+            //SCROLL UP
+            onHiddenChanged(false);
         }
     }
 
     private void showViews(){
-        if(newsLoaded && (Main.PROFILE.getClubs() == null || rvAdapter != null)){
+        System.out.println("SHOW VIEWS: " + newsLoaded + ", " + rvAdapter);
+        if(newsLoaded && ((Main.PROFILE.getClubs() == null || Main.PROFILE.getClubs().isEmpty())
+                || rvAdapter != null)){
             System.out.println("ALL LOADED");
             progressBar.setVisibility(View.GONE);
             dateGroupView.setVisibility(View.VISIBLE);
-            announcements.setVisibility(View.VISIBLE);
             calendar.setVisibility(View.VISIBLE);
+            if(announcements.getAdapter() != null) {
+                announcements.setVisibility(View.VISIBLE);
+                announError.setVisibility(View.GONE);
+            }else{
+                announcements.setVisibility(View.GONE);
+                announError.setVisibility(View.VISIBLE);
+            }
 
-            if(Main.PROFILE.getClubs() != null && rvAdapter.getItemCount() > 0){
+            if(Main.PROFILE.getClubs() != null && (rvAdapter != null && rvAdapter.getItemCount() > 0)){
                 clubGroup.setVisibility(View.VISIBLE);
                 homeClubLoading.setVisibility(View.VISIBLE);
             }
 
-            homeScrollView.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    homeScrollView.fullScroll(View.FOCUS_UP);
-                }
-            }, 1L);
+            //SCROLL UP
+            onHiddenChanged(false);
 
             homeSwipeRefresh.setRefreshing(false);
             homeSwipeRefresh.setEnabled(true);
@@ -269,7 +282,6 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
             if(AppUtils.isNetworkAvailable(this.getActivity())){
                 Crashlytics.log("Couldn't retrieve website!");
             }
-            setOffline();
             return new ArrayList<NewsItem>();
         }
     }
@@ -371,11 +383,13 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
 
     @Override
     public void setOffline() {
-        cancelTasks();
+        cancelTasks(true);
 
         dateGroupView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
+        announcements.setAdapter(null);
         announcements.setVisibility(View.GONE);
+        announError.setVisibility(View.GONE);
         clubGroup.setVisibility(View.GONE);
         calendar.setVisibility(View.GONE);
         clubGroup.setVisibility(View.GONE);
@@ -391,27 +405,30 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     public void refreshAnnouns(){
         if(!homeSwipeRefresh.isRefreshing() || requestedRefresh){
             requestedRefresh = false;
-            if(AppUtils.isNetworkAvailable(this.getActivity()) && Main.PROFILE != null && !this.isHidden()){
-                if(progressBar.getVisibility() == View.GONE){
-                    main.refreshProfile();
-                }
-
-                cancelTasks();
-                newsLoaded = false;
-
-                task = new GetWebsiteTask(this);
-                task.execute(getResources().getString(R.string.newsSiteUrl));
-
-                rvAdapter = null;
-                clubAnnounTasks = new ArrayList<GetClubAnnounsTask>();
-
-                if(Main.PROFILE.getClubs() != null){
-                    for(String clubId : Main.PROFILE.getClubs()){
-                        GetClubAnnounsTask announsTask = new GetClubAnnounsTask(clubId, this.getActivity(), this);
-                        announsTask.execute();
-                        clubAnnounTasks.add(announsTask);
+            if(AppUtils.isNetworkAvailable(this.getActivity()) && Main.PROFILE != null){
+                if(!this.isHidden()){
+                    System.out.println("REFRESHING");
+                    if(progressBar.getVisibility() == View.GONE){
+                        main.refreshProfile();
                     }
-                    homeClubLoading.setVisibility(View.VISIBLE);
+
+                    cancelTasks(true);
+                    newsLoaded = false;
+
+                    task = new GetWebsiteTask(this);
+                    task.execute(getResources().getString(R.string.newsSiteUrl));
+
+                    rvAdapter = null;
+                    clubAnnounTasks = new ArrayList<GetClubAnnounsTask>();
+
+                    if(Main.PROFILE.getClubs() != null){
+                        for(String clubId : Main.PROFILE.getClubs()){
+                            GetClubAnnounsTask announsTask = new GetClubAnnounsTask(clubId, this.getActivity(), this);
+                            announsTask.execute();
+                            clubAnnounTasks.add(announsTask);
+                        }
+                        homeClubLoading.setVisibility(View.VISIBLE);
+                    }
                 }
             }else{
                 if(Main.PROFILE == null){
@@ -423,16 +440,18 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
         }
     }
 
-    public void cancelTasks(){
+    public void cancelTasks(boolean all){
         if(task != null){
-            task.cancel(true);
+            task.cancel(false);
         }
 
-        /*if(clubAnnounTasks != null && !clubAnnounTasks.isEmpty()){
-            for(GetClubAnnounsTask announTask : clubAnnounTasks){
-                announTask.cancel(true);
+        if(all){
+            if(clubAnnounTasks != null && !clubAnnounTasks.isEmpty()) {
+                for (GetClubAnnounsTask announTask : clubAnnounTasks) {
+                    announTask.cancel(true);
+                }
             }
-        }*/
+        }
     }
 
     public void setMain(Main main){
@@ -442,8 +461,18 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     @Override
     public void onHiddenChanged(boolean hidden) {
         if(hidden){
-            cancelTasks();
+            //cancelTasks(false);
             homeSwipeRefresh.setRefreshing(false);
+        }else{
+           /* if(homeScrollView != null){
+                homeScrollView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        homeScrollView.requestFocus();
+                        homeScrollView.fullScroll(View.FOCUS_UP);
+                    }
+                }, 10L);
+            }*/
         }
         super.onHiddenChanged(hidden);
     }
@@ -451,8 +480,10 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     @Override
     public void onResume(){
         super.onResume();
-        if(Main.PROFILE != null && progressBar.getVisibility() == View.VISIBLE){
+        if(Main.PROFILE != null && progressBar != null
+                && progressBar.getVisibility() == View.VISIBLE){
             refreshAnnouns();
         }
+        onHiddenChanged(false);
     }
 }
