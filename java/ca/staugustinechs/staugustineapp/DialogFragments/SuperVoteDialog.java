@@ -102,7 +102,7 @@ public class SuperVoteDialog extends DialogFragment {
                 alertBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog2, int which) {
-                        songsFragment.superVote(votes, song.getId());
+                        songsFragment.superVote(barProgress, votes, song.getId());
                     }
                 });
 

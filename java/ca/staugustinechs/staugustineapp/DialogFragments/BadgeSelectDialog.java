@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.internal.BaselineLayout;
 import android.support.v4.app.DialogFragment;
@@ -19,10 +20,12 @@ import ca.staugustinechs.staugustineapp.Activities.BadgeScanner;
 import ca.staugustinechs.staugustineapp.Activities.ClubDetails;
 import ca.staugustinechs.staugustineapp.Activities.Login;
 import ca.staugustinechs.staugustineapp.Activities.Main;
+import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.Fragments.IconSelectFragment;
 import ca.staugustinechs.staugustineapp.Objects.Badge;
 import ca.staugustinechs.staugustineapp.Objects.ProfileIcon;
 import ca.staugustinechs.staugustineapp.Objects.UserProfile;
+import ca.staugustinechs.staugustineapp.R;
 
 public class BadgeSelectDialog extends DialogFragment {
 
@@ -78,7 +81,9 @@ public class BadgeSelectDialog extends DialogFragment {
 
         ImageView img = new ImageView(this.getActivity());
         img.setId(View.generateViewId());
-        img.setImageBitmap(badge.getImg());
+        Bitmap bitmap = badge.getImg();
+        int size = AppUtils.getDimen(R.dimen.badge_size, activity) * 2;
+        img.setImageBitmap(Bitmap.createScaledBitmap(bitmap, size, size, false));
         img.setPadding(0, 42, 0, 0);
         img.setForegroundGravity(Gravity.CENTER_HORIZONTAL);
         img.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,

@@ -85,7 +85,13 @@ public class EditClubDialog extends DialogFragment {
             radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
-                    currentlyChecked = checkedId - 1;
+                    if(checkedId == R.id.dcd_btn0){
+                        currentlyChecked = 0;
+                    }else if(checkedId == R.id.dcd_btn1){
+                        currentlyChecked = 1;
+                    }else if(checkedId == R.id.dcd_btn2){
+                        currentlyChecked = 2;
+                    }
                 }
             });
 
@@ -133,10 +139,6 @@ public class EditClubDialog extends DialogFragment {
                                 Toast.makeText(name.getContext(),
                                         "Must choose banner image!", Toast.LENGTH_LONG).show();
                             }else{
-                                while(currentlyChecked > 2){
-                                    currentlyChecked -= 3;
-                                }
-
                                 if(clubDetails != null){
                                     clubDetails.updateClub(name.getText().toString(),
                                             desc.getText().toString(), selectedImage, currentlyChecked);

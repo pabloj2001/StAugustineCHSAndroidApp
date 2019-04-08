@@ -50,7 +50,7 @@ public class CreateBadgeDialog extends DialogFragment {
     private Uri selectedImage;
     private ImageView imgPreview;
     private Badge badge;
-    private boolean memberBadge = false;
+    private boolean clubBadge = false;
 
     public CreateBadgeDialog(){
 
@@ -64,8 +64,8 @@ public class CreateBadgeDialog extends DialogFragment {
         this.badge = badge;
     }
 
-    public void isMemberBadge(boolean memberBadge){
-        this.memberBadge = memberBadge;
+    public void setClubBadge(boolean clubBadge){
+        this.clubBadge = clubBadge;
     }
 
     @Override
@@ -124,7 +124,7 @@ public class CreateBadgeDialog extends DialogFragment {
                                         "Must choose badge image!", Toast.LENGTH_LONG).show();
                             }else{
                                 if(badge == null){
-                                    clubDetails.createBadge(selectedImage, desc.getText().toString(), memberBadge);
+                                    clubDetails.createBadge(selectedImage, desc.getText().toString(), clubBadge);
                                     dialog.dismiss();
                                 }else{
                                     clubDetails.updateClubBadge(selectedImage, badge.getImgName(), desc.getText().toString());

@@ -131,8 +131,8 @@ public class AddClubAnnounDialog extends DialogFragment {
                         @Override
                         public void onClick(View view) {
                             // POST ANNOUNCEMENT
-                            if((title.getText().toString().trim().length() == 0 || title.getText().length() > 50)
-                                    && Main.PROFILE.getStatus() != Main.DEV){
+                            if((title.getText().length() <= 0 || (title.getText().length() > 50)
+                                        && Main.PROFILE.getStatus() != Main.DEV)){
                                 Toast.makeText(content.getContext(),
                                         "Title can't be empty or over 50 characters!", Toast.LENGTH_LONG).show();
                             }else if(content.getText().length() > 300 && Main.PROFILE.getStatus() != Main.DEV){
