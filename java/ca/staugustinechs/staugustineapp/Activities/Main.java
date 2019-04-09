@@ -125,17 +125,6 @@ public class Main extends AppCompatActivity
                 //SET CRASHLYTICS IDENTIFIER
                 Crashlytics.setUserIdentifier(FirebaseAuth.getInstance().getUid());
 
-                //REGISTER MSG ID WITH FIRESTORE
-                FirebaseInstanceId.getInstance().getInstanceId()
-                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                                if (task.isSuccessful()) {
-                                    MessagingService.registerToken(task.getResult().getToken());
-                                }
-                            }
-                        });
-
                 //SET TOOLBAR
                 toolbar = (Toolbar) findViewById(R.id.toolbar);
                 setSupportActionBar(toolbar);
@@ -251,7 +240,7 @@ public class Main extends AppCompatActivity
            /* if (Main.REGISTER_TOKEN) {
                 MessagingService.registerToken();
             } else if ((Main.PROFILE.getMessagingToken() == null
-                    || Main.PROFILE.getMessagingToken().isEmpty())) {
+                    || Main.PROFILE.getMessagingToken().isEmpty())) {*/
                 //GET DEVICE MESSAGE ID AND REGISTER INTO FIRESTORE
                 FirebaseInstanceId.getInstance().getInstanceId()
                         .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
@@ -262,7 +251,7 @@ public class Main extends AppCompatActivity
                                 }
                             }
                         });
-            }*/
+            //}
         } else {
             //WE COULDN'T GET THE USER'S DOCUMENT SO THE DATABASE
             //MUST BE UNREACHABLE AT THE MOMENT (PROBABLY THE DEVICE IS OFFLINE)
