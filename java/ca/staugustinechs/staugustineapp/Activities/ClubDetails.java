@@ -107,27 +107,37 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         getWindow().setNavigationBarColor(AppUtils.PRIMARY_DARK_COLOR);
         getWindow().setStatusBarColor(AppUtils.PRIMARY_DARK_COLOR);
 
+        //SET TITLE, SUPPORT ACTION BAR COLOR, AND ENABLE BACK ARROW
         this.getSupportActionBar().setTitle("Clubs");
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         this.getSupportActionBar().setBackgroundDrawable(new ColorDrawable(AppUtils.PRIMARY_COLOR));
 
+        //GET CLUB
         club = (ClubItem) getIntent().getSerializableExtra("club");
         club.unpack(this);
-
+        
+        //SET CLUB BANNER
         cdBanner = (ImageView) findViewById(R.id.cdBanner);
         cdBanner.setImageBitmap(club.getImg());
 
+        //SET CLUB NAME
         cdName = (TextView) findViewById(R.id.cdName);
         cdName.setText(club.getName());
         cdName.setBackgroundColor(AppUtils.PRIMARY_COLOR);
 
+        //SET CLUB DESCRIPTION
         cdDesc = (TextView) findViewById(R.id.cdDesc);
         cdDesc.setText(club.getDesc());
 
+        //SET CLUB NAME 2
+        //THIS IS INVISIBLE UNTIL THE USER SCROLLS PAST THE CLUB NAME
+        //THEN THIS NAME APPEARS AND STICKS TO THE TOP OF THE SCREEN
         cdName2 = (TextView) findViewById(R.id.cdName2);
         cdName2.setText(club.getName());
         cdName2.setBackgroundColor(AppUtils.PRIMARY_COLOR);
 
+        //SET SCROLL VIEW'S SCROLL CHANGE LISTENER SO WE CAN KNOW WHEN
+        //TO SHOW OR HIDE THE CLUB NAME 2
         cdScrollView = (NestedScrollView) findViewById(R.id.cdScrollView);
         cdScrollView.getViewTreeObserver().addOnScrollChangedListener(this);
 
@@ -146,6 +156,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         cdSwipeRefresh.setColorSchemeColors(AppUtils.ACCENT_COLOR);
         cdSwipeRefresh.setEnabled(false);
 
+        //GET WHETHER THE USER IS AN ADMIN OR MEMBER OF THE CLUB
         this.isAdmin = Main.PROFILE.getStatus() == 2 || club.getAdmins().contains(FirebaseAuth.getInstance().getUid());
         this.isMember = isAdmin || club.getMembers().contains(FirebaseAuth.getInstance().getUid());
 
@@ -174,12 +185,13 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         rv.setLayoutManager(layoutManager);
 
-        //GET BADGES
+        //GET CLUB BADGES
         getBadgesTask = new GetBadgesTask(this);
         getBadgesTask.execute();
 
         this.badges = new ArrayList<Badge>();
 
+        //IF USER IS A MEMBER OF THE CLUB, SHOW ANNOUNCEMENTS
         if(isMember){
             //SHOW ANNOUNCEMENTS TITLE
             TextView cdAnnounTitle = (TextView) findViewById(R.id.cdAnnounHeader);
@@ -203,6 +215,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             };
             rv2.setLayoutManager(layoutManager2);
 
+            //IF USER IS AN ADMIN, SHOW BUTTON TO ADD ANNOUNCEMENT
             if(isAdmin){
                 FloatingActionButton cdAddAnnouncs = (FloatingActionButton) findViewById(R.id.cdAddAnnouncement);
                 cdAddAnnouncs.setBackgroundTintList(AppUtils.ACCENT_COLORSL);
@@ -216,6 +229,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             }
         }
 
+        //IF USER IS NOT A MEMBER OR IS A DEV, SHOW BUTTON TO JOIN CLUB
         if(!isMember || (Main.PROFILE.getStatus() == Main.DEV &&
                     !club.getAdmins().contains(FirebaseAuth.getInstance().getUid())
                     && !club.getMembers().contains(FirebaseAuth.getInstance().getUid()))){
@@ -223,6 +237,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             cdJoinBtn.setOnClickListener(this);
             cdJoinBtn.setVisibility(View.VISIBLE);
 
+            //CHANGE JOIN BUTTON ENABLED DEPENDING ON CLUB JOIN PREF
             if(club.getJoinPref() == 0){
                 cdJoinBtn.setEnabled(false);
             }else if(club.getJoinPref() == 1){
