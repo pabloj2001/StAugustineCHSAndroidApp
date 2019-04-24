@@ -66,10 +66,13 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_badgescanner);
+        //SET TITLE AND ENABLE BACK ARROW IN TOP LEFT OF ACTIVITY
         this.getSupportActionBar().setTitle("Give Away Badge");
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        //GET BADGE ID WE ARE GIVING AWAY
         badgeId = getIntent().getExtras().getString("BADGE");
+        //SET COLORS
         ((TextView) findViewById(R.id.bsSummary)).setTextColor(AppUtils.ACCENT_COLOR);
         findViewById(R.id.bsLinLayout).setBackgroundColor(AppUtils.PRIMARY_COLOR);
     }
@@ -77,11 +80,16 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        //INIT FIREBASE VISION OPTIONS
         options = new FirebaseVisionBarcodeDetectorOptions.Builder()
                         .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_QR_CODE)
                         .build();
 
+        //INIT METADATA FOR FIREBASE VISION
         try {
+            //SUPPOSEDLY 480x360 IS GOOD ENGOUGH FOR IMAGE RECOGNITION,
+            //BUT WHEN I FIRST TRIED IT OUT IT DIDN'T WORK SINCE THE IAMGE WAS SO SMALL
+            //IT COULDN'T FIND THE QR CODE. THAT GOT FIXED BY MAKING THE IMAGE BIGGER
             metadata = new FirebaseVisionImageMetadata.Builder()
                     .setWidth(1920)   // 480x360 is typically sufficient for
                     .setHeight(1080)  // image recognition (HA not in this case...)
@@ -92,6 +100,7 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
             e.printStackTrace();
         }
 
+        //INIT SURFACE VIEW AKA CAMERA PREVIEW
         this.surfaceView = findViewById(R.id.bsSurfaceView);
         this.surfaceHolder = surfaceView.getHolder();
         this.surfaceHolder.addCallback(this);
@@ -99,25 +108,36 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
         this.surfaceHolder.setSizeFromLayout();
     }
 
+    //EVERY TIME THE SURFACE VIEW HAS A NEW FRAME TO DISPLAY THIS METHOD GETS CALLED
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
+        //IF WE'RE DONE TRYING TO FIND QR CODES IN THE LAST FRAME
+        //WE CAN TRY DOING SO IN THE NEXT AVAILABLE FRAME
         if(isDone){
+            //GET THE IMAGE FROM THE PREVIEW DATA
             FirebaseVisionImage image = FirebaseVisionImage.fromByteArray(data, metadata);
+            //INIT IMAGE QR CODE DETECTOR
             FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
                     .getVisionBarcodeDetector(options);
 
             isDone = false;
             try {
+                //EXECUTE TASK TO DETECT QR CODE IN PREVIEW FRAME
                 Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
                         .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
                             @Override
                             public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
                                 if (cam != null) {
+                                    //IF WE'VE FOUND A QR CODE IN THE IMAGE, DO STUFF WITH IT
                                     if (barcodes.size() > 0) {
                                         FirebaseVisionBarcode barcode = barcodes.get(0);
+                                        //DECRYPT THE EMAIL FROM THE QR CODE/TITAN TAG
                                         final String email = TitanTagEncryption.decrypt(barcode.getRawValue());
-                                        //MAKE SURE EMAIL IS DECODED PROPERLY
+                                        //MAKE SURE EMAIL IS DECODED PROPERLY; BASICALY WE'RE CHECKING
+                                        //IF THE EMAIL HAS ONLY LETTERS FROM A - Z AND NUMBERS FROM 0 - 9
+                                        //AS WELL AS THE CHARACTERS . AND @
                                         if (email.matches("[A-Za-z0-9.@]+")) {
+                                            //IF WE AREN'T SHOWING A CONFIRM DIALOG, CONTINUE
                                             if (dialogHidden) {
                                                 dialogHidden = false;
 
@@ -142,6 +162,8 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
                                                         dialog.cancel();
                                                     }
                                                 });
+                                                //IF THE ADMIN CLICKS GIVE, GIVE THE USER WHOSE TITAN TAG
+                                                //WE'VE SCANNED THE IMAGE
                                                 builder.setPositiveButton("Give", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
@@ -171,7 +193,7 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
             email += "@ycdsbk12.ca";
         }
 
-        //GET USER
+        //GET USER'S DOCUMENT
         FirebaseFirestore.getInstance().collection("users")
                 .whereEqualTo("email", email)
                 .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -182,7 +204,7 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
                     final TextView bsSummary = findViewById(R.id.bsSummary);
                     if(docs.size() > 0 && docs.get(0).exists()){
                         final UserProfile user = new UserProfile(docs.get(0).getId(), docs.get(0).getData());
-                        //GIVE USER BADGE
+                        //GIVE USER THE BADGE
                         user.giveBadge(badgeId, new OnCompleteListener() {
                             @Override
                             public void onComplete(@NonNull Task task2) {
@@ -218,17 +240,21 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        //CHECK IF WE CAN USE THE CAMERA
         if(hasCamera()){
             if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_GRANTED){
+                //GET CAMERA
                 this.cam = getCameraInstance();
                 if(this.cam != null){
                     try {
+                        //SET CAMERA PARAMETERS
                         Camera.Parameters parameters = cam.getParameters();
                         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
                         parameters.setPictureFormat(ImageFormat.NV21);
                         this.cam.setParameters(parameters);
 
+                        //START DISPLAYING CAMERA PREVIEW ON SURFACE VIEW
                         this.cam.setPreviewCallback(this);
                         this.cam.setDisplayOrientation(90);
                         this.cam.setPreviewDisplay(surfaceHolder);
@@ -237,9 +263,11 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
                         e.printStackTrace();
                     }
                 }else{
+                    //IF WE CAN'T USE THE CAMERA, FINISH THE ACTIVITY
                     finish();
                 }
             }else{
+                //REQUEST CAMERA PERMISSIONS
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 21);
             }
         }
@@ -280,6 +308,7 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
+        //TRY TO CREATE THE SURFACE AGAIN ONCE THE CAMERA PERMISSION HAS BEEN GIVEN
         if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
             surfaceCreated(surfaceHolder);
         }else{
@@ -289,6 +318,7 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //WHEN THE BACK ARROW IS PRESSED IN THE TOP LEFT CORNER, FINISH THE ACTIVITY
         switch(item.getItemId()){
             case android.R.id.home:
                 finish();
@@ -297,6 +327,7 @@ public class BadgeScanner extends AppCompatActivity implements SurfaceHolder.Cal
         return super.onOptionsItemSelected(item);
     }
 
+    //STUFF TO DO WITH ORIENTATION, DON'T PAY ATTENTION
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
