@@ -252,17 +252,22 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         }
     }
 
+    //UPLOAD ANNOUNCEMENT IMAGE TO DB AND CALL uploadToDB METHOD TO CREATE ANNOUNCEMENT IN DB
     public void postAnnouncement(final String title, final String content, final Uri img){
         showPostSnack(0);
-        //UPLOAD IMG
         if (img != null && !img.getPath().isEmpty()) {
+            //IF THERE IS AN IMAGE WITH THE ANNOUNCEMENT
+            //GENERATE A NAME FOR IT
             final String imgName = AppUtils.getRandomKey(20);
+            //TURN IT TO BYTES
             byte[] imgBytes = AppUtils.getImgBytes(img, 0, 0, this);
+            //AND UPLOAD IT INTO FIREBASE STORAGE
             AppUtils.uploadImg(imgName, imgBytes, "announcements/",
                     new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> taskStorage) {
                     if(taskStorage.isSuccessful()){
+                        //ONCE THE IMAGE UPLOAD IS COMPLETE, CREATE THE ANNOUNCEMENT IN THE DB
                         uploadToDB(title, content, imgName);
                     }else{
                         showPostSnack(2);
@@ -270,12 +275,14 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 }
             });
         } else {
+            //IF THERE IS NO IMAGE, CONTINUE WITH CREATING THE ANNOUNCEMENT IN THE DB
             uploadToDB(title, content, "");
         }
     }
 
+    //CREATE ANNOUNCEMENT IN DB
     private void uploadToDB(final String title, final String content, final String imgName){
-        //GATHER DATA
+        //GATHER DATA INTO MAP
         Map<String, Object> data = new HashMap<>();
         data.put("title", title);
         data.put("content", content);
@@ -292,20 +299,16 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                     @Override
                     public void onComplete(@NonNull final Task<DocumentReference> taskAnnoun) {
                         if (taskAnnoun.isSuccessful()) {
-                            if (taskAnnoun.isSuccessful()) {
-                                showPostSnack(1);
-                                MessagingService.sendMessage(club.getId(), club.getName(),
+                            showPostSnack(1);
+                            //SEND NOTIFICATION TO ALL CLUB MEMBERS
+                            MessagingService.sendMessage(club.getId(), club.getName(),
                                         title, content, null);
-                                refreshContent(true);
-                            } else {
-                                showPostSnack(2);
-                                FirebaseFirestore.getInstance()
-                                        .collection("announcements")
-                                        .document(taskAnnoun.getResult().getId()).delete();
-                            }
+                            //REFRESH CLUB CONTENT
+                            refreshContent(true);
                         } else {
                             showPostSnack(2);
                             if (taskAnnoun.getResult() != null) {
+                                //DELETE ANNOUNCEMENT
                                 FirebaseFirestore.getInstance()
                                         .collection("announcements")
                                         .document(taskAnnoun.getResult().getId()).delete();
@@ -316,13 +319,16 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 });
     }
 
+    //UPLOAD ANNOUNCEMENT IMAGE AND UPDATE EXISTING ANNOUNCEMENT
     public void updateAnnouncement(final String id, final String title, final String content, final Uri img){
         showPostSnack(0);
 
-        //UPLOAD IMG
         if (img != null && !img.getPath().isEmpty()) {
+            //IF THE USER WANTS TO UPLOAD A NEW IMAGE,
+            //DELETE THE OLD ONE FROM FIREBASE STORAGE
             deleteImg(id);
-
+                
+            //UPLOAD THE NEW ONE FOLLOWING THE SAME STEPS AS THE METHOD postAnnouncement
             final String imgName = AppUtils.getRandomKey(20);
             byte[] imgBytes = AppUtils.getImgBytes(img, 0, 0, this);
             AppUtils.uploadImg(imgName, imgBytes, "announcements/",
@@ -330,6 +336,8 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> taskStorage) {
                             if(taskStorage.isSuccessful()){
+                                //ONCE THE IMAGE HAS BEEN UPLOADED SUCCESSFULLY,
+                                //UPDATE THE EXISTING ANNOUNCEMENT IN THE DB
                                 updateDBAnnoun(id, title, content, imgName);
                             }else{
                                 showPostSnack(2);
@@ -337,13 +345,14 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                         }
                     });
         }else{
+            //IF USER DOESN'T WANT TO UPLOAD A NEW IMAGE, SIMPLY UPDATE THE EXISTING ANNOUNCEMENT
             updateDBAnnoun(id, title, content, null);
         }
     }
 
+    //UPDATE EXISTING ANNOUNCEMENT IN DB
     private void updateDBAnnoun(String id, final String title, final String content, String imgName){
-        //CREATE ANNOUNCEMENT
-        //GATHER DATA
+        //GATHER DATA INTO MAP
         Map<String, Object> data = new HashMap<>();
         data.put("title", title);
         data.put("content", content);
@@ -352,7 +361,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             data.put("img", imgName);
         }
 
-        //UPDATE DB
+        //UPDATE ANNOUNCEMENT IN DB
         FirebaseFirestore.getInstance()
                 .collection("announcements").document(id).update(data)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -360,6 +369,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             showPostSnack(1);
+                            //REFRESH CLUB CONTENT
                             refreshContent(true);
                         } else {
                             showPostSnack(2);
@@ -368,18 +378,24 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 });
     }
 
+    //UPLOAD NEW BANNER IMAGE IF PROVIDED AND UPLOAD NEW CLUB INFORMATION TO DB
     public void updateClub(final String name, final String desc, final Uri img, final int checked) {
         showPostSnack(8);
 
+        //USE PREVIOUS IMAGE NAME IF IT EXISTS (WHICH IT SHOULD), OTHERWISE GENERATE A NEW NAME
         final String imgName = ((club.getImgName() != null && !club.getImgName().isEmpty())
                 ? club.getImgName().split("_")[0] : AppUtils.getRandomKey(20));
+            
         if (img != null) {
+            //GET IMAGE OF THE RIGHT SIZE
             byte[] imgBytes = AppUtils.getImgBytes(img, 1280, 720, this);
+            //UPLOAD IAMGE TO STORAGE
             AppUtils.uploadImg(imgName, imgBytes, "clubBanners/",
                     new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> taskStorage) {
                     if(taskStorage.isSuccessful()){
+                        //ONCE DONE, UPDATE THE CLUB INFO IN THE DB
                         updateDBClub(name, desc, img, imgName, checked);
                     }else{
                         showPostSnack(10);
@@ -391,8 +407,9 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         }
     }
 
+    //UPDATE CLUB INFO IN DATABASE
     private void updateDBClub(final String name, final String desc, final Uri img, String imgName, final int checked){
-        //GATHER DATA
+        //GATHER DATA INTO MAP
         Map<String, Object> data = new HashMap<>();
         data.put("name", name);
         data.put("desc", desc);
@@ -429,7 +446,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
 
                             showPostSnack(9);
 
-                            //UPDATE CLUB STUFF
+                            //UPDATE LOCAL CLUB OBJECT
                             club.setJoinPref(checked);
                             club.setName(name);
                             club.setDesc(desc);
@@ -441,6 +458,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                                         .load(img)
                                         .into(cdBanner);
                             }
+                                
                             //UPDATE CLUBS WHEN USER EXITS ClubDetails
                             ClubsFragment.REFRESH_CLUBS = true;
                         } else {
@@ -460,7 +478,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                     @Override
                     public void onComplete(@NonNull Task<Void> clubTask) {
                         if (clubTask.isSuccessful()) {
-                            //DELETE IMG IF ANY
+                            //DELETE IMG FROM FIREBASE STORAGE IF THERE WAS ONE
                             deleteImg(id);
 
                             //DELETE ANNOUNCEMENT FROM ANNOUNCEMENTS COLLECTION
@@ -471,6 +489,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
                                                 showPostSnack(4);
+                                                //REFRESH LOCAL CLUB CONTENT
                                                 refreshContent(false);
                                             } else {
                                                 showPostSnack(5);
@@ -494,7 +513,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             }
         }
 
-        //DELETE ANNOUNCEMENT'S IMAGE IN STORAGE
+        //DELETE ANNOUNCEMENT'S IMAGE IN STORAGE IF IT EXISTS
         if(announ != null && announ.getImgName() != null && !announ.getImgName().isEmpty()){
             FirebaseFirestore.getInstance().collection("announcements")
                     .document(id).update("img", "");
@@ -507,6 +526,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful()){
                         showPostSnack(6);
+                        //REFRESH LOCAL CLUB CONTENT
                         refreshContent(false);
                     }else{
                         showPostSnack(7);
@@ -520,6 +540,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
     }
 
     private void showPostSnack(int id){
+        //MAKE A SNACKBAR DEPENDING ON THE NUMBER PROVIDED//
         if(this != null && !this.isDestroyed()){
             View view = (View) this.findViewById(R.id.cdAnnounHeader);
             String snack = "";
@@ -580,6 +601,8 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         }
     }
 
+    //GETS CALLED WHEN AN ANNOUNCEMENT IS HELD BY AN ADMIN
+    //AND CREATES A DIALOG TO EDIT THE ANNOUNCEMENT
     public void announHeld(View view){
         EditAnnounDialog dialog = new EditAnnounDialog();
         dialog.setClubDetails(this);
@@ -588,12 +611,13 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         dialog.show(this.getSupportFragmentManager(), "editAnnounDialog");
     }
 
+    //SHOW BADGES IN RECYCLER VIEW
     public void updateBadges(List<Badge> badges) {
         cdLoadingCircle.setVisibility(View.GONE);
 
         TextView cdBadgesError = this.findViewById(R.id.cdBadgesError);
         if(badges.isEmpty() || badges.get(0) == null){
-            //NO BADGES, TELL THE USER
+            //SHOW A CREATE NEW BADGE BUTTON IF USER IS AN APP DEV
             if(Main.PROFILE.getStatus() == 2){
                 FrameLayout.LayoutParams params2 = new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
@@ -612,13 +636,15 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 params.addRule(RelativeLayout.BELOW, R.id.cdBadgesGroup);
                 cdBadgesExtras.setLayoutParams(params);
             }
-
+            
+            //NO BADGES, TELL THE USER
             cdBadgesError.setVisibility(View.VISIBLE);
         }else{
             this.badges = badges;
 
             cdBadgesError.setVisibility(View.GONE);
 
+            //CREATE ADAPTER TO SHOW BADGES IN RECYCLERVIEW
             RViewAdapter_Badges adapter = new RViewAdapter_Badges(this.badges, this);
             rv.setAdapter(adapter);
 
@@ -633,10 +659,13 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             rvView.setVisibility(View.VISIBLE);
         }
 
+        //IF USER IS AN ADMIN, LET THEM CREATE NEW BADGES
         if(Main.PROFILE.getStatus() == 2){
             cdBadgesAdd.setVisibility(View.VISIBLE);
         }
 
+        //SCROLL UP BECAUSE FOR SOME REASON IT LIKES TO SCROLL ALL THE WAY DOWN THE ACTIVITY
+        //WHEN THERE ARE MULTIPLE RECYCLERVIEWS IN ONE SCREEN
         cdScrollView.requestFocus();
         cdScrollView.postDelayed(new Runnable() {
             @Override
@@ -646,6 +675,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         }, 1L);
     }
 
+    //SHOW ANNOUNCEMENTS IN RESPECTIVE RECYCLERVIEW
     public void updateAnnouns(List<ClubAnnouncement> announs){
         this.announs = announs;
 
@@ -672,6 +702,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
 
             cdLoadingCircle2.setVisibility(View.GONE);
 
+            //CREATE OR USE EXISTING ADAPTER TO DISPLAY ANNOUNCEMENTS IN RECYCLERVIEW
             if(adapter == null){
                 adapter = new RViewAdapter_ClubAnnouns(this.announs, this);
                 rv2.setAdapter(adapter);
@@ -679,6 +710,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 adapter.setAnnouncements(announs);
             }
 
+            //GET CREATORS OF EACH ANNOUNCEMENT
             List<String> users = new ArrayList<String>();
             for(ClubAnnouncement announ : announs){
                 if(!adapter.containsCreator(announ.getCreator())) {
@@ -686,7 +718,8 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 }
             }
 
-            //FOR THE LAST TIME, DON'T DO THISS!!!
+            //LOAD CREATORS
+            //(FOR THE LAST TIME, DON'T DO THISS!!!)
             @SuppressLint("StaticFieldLeak")
             GetUserTask task = new GetUserTask(this, users){
                 @Override
@@ -696,13 +729,16 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             };
             task.execute();
 
+            //MAKE ANNOUNCEMENTS VISIBLE
             View rvView = this.findViewById(R.id.cdAnnouncements);
             rvView.setVisibility(View.VISIBLE);
         }
 
+        //ALLOW USER TO REFRESH CLUB CONTENT
         cdSwipeRefresh.setRefreshing(false);
         cdSwipeRefresh.setEnabled(true);
 
+        //SCROLL UP
         cdScrollView.requestFocus();
         cdScrollView.postDelayed(new Runnable() {
             @Override
@@ -812,7 +848,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         cdSwipeRefresh.setRefreshing(true);
 
         if(refreshClub){
-            //UPDATE CLUB DATA
+            //FETCH ALL CLUB DATA
             FirebaseFirestore.getInstance().collection("clubs").document(club.getId())
                     .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
@@ -826,7 +862,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 }
             });
         }else{
-            //UPDATE CONTENT
+            //FETCH ANNOUNCEMENTS AND BADGES
             getClubAnnounsTask = new GetClubAnnounsTask(this.club.getId(), this, this);
             getClubAnnounsTask.execute();
 
@@ -835,6 +871,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         }
     }
 
+    //FINISH ACTIVITY AND FORCE MAIN ACTIVITY TO REFRESH CLUB DATA
     public void restartClub(){
         ClubsFragment.REFRESH_CLUBS = true;
         if(!this.isDestroyed()){
@@ -845,11 +882,14 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
     @Override
     public void onClick(final View v) {
         if(v.getId() == R.id.cdAddAnnouncement){
+            //ADD ANNOUNCEMENT BUTTON WAS CLICKED, SHOW ADD ANNOUNCEMENT DIALOG
             AddClubAnnounDialog dialog = new AddClubAnnounDialog();
             dialog.setClubDetails(this);
             dialog.show(this.getSupportFragmentManager(), "addClubDialog");
         }else if(v.equals(cdJoinBtn)){
+            //JOIN CLUB BUTTON WAS PRESSED
             if(club.getJoinPref() == 1){
+                //SINCE THE CLUB IS REQUEST TO JOIN, NOTIFIY ADMINS USER WANTS TO JOIN
                 Map<String, Object> data = new HashMap<String, Object>();
                 data.put("userEmail", Main.PROFILE.getEmail());
                 data.put("adminIDArr", club.getAdmins());
@@ -865,6 +905,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
+                                //ALERT USER THAT ADMINS HAVE BEEN NOTIFIED
                                 AlertDialog.Builder builder = new AlertDialog.Builder(ClubDetails.this);
                                 builder.setMessage("New members require admin approval to join this club. " +
                                         "You'll receive a notification once you have been accepted.");
@@ -883,9 +924,12 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 cdJoinBtn.setEnabled(false);
                 Snackbar.make(cdScrollView, "Joining club...", Snackbar.LENGTH_LONG).show();
             }else if(club.getJoinPref() == 2){
+                //ANYONE CAN JOIN THE CLUB, SO ADD THE USER TO THE CLUB
                 club.addUser(Main.PROFILE.getUid(), new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        //RESTART THE CLUB SO IT APPEARS IN USER'S CLUBS THAT HE/SHE IS A PART OF
+                        //AND SHOWS THE NORMAL MEMBER INTERFACE
                         restartClub();
                     }
                 });
@@ -893,6 +937,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 Snackbar.make(cdScrollView, "Joining club...", Snackbar.LENGTH_LONG).show();
             }
         }else if(v.equals(cdBadgesAdd)){
+            //ADD BADGES BUTTON CLICKED, SHOW THE CREATE BADGE DIALOG
             CreateBadgeDialog dialog = new CreateBadgeDialog();
             dialog.setClubDetails(this);
             dialog.show(this.getSupportFragmentManager(), "CreateBadgeDialog");
@@ -901,6 +946,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //IF THE BACK BUTTON IS PRESSED IN THE TOP LEFT CORNER, FINISH THE ACTIVITY
         switch(item.getItemId()){
             case android.R.id.home:
                 finish();
@@ -911,6 +957,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        //DON'T KNOW WHAT THIS DOES OR WHY IT'S HERE TBH....
         super.onTouchEvent(event);
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
@@ -1076,6 +1123,8 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
 
     @Override
     public void onScrollChanged() {
+        //IF USER SCROLLS PAST A POINT, HIDE CLUB NAME AND SHOW CLUB NAME 2,
+        //WHICH IS ALWAYS AT THE TOP OF THE SCREEN
         if(cdName != null && cdName2 != null){
             if(cdNameY == 0){
                 cdNameY = (int) cdName.getY();
