@@ -17,6 +17,7 @@ public class IconSelect extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_iconselect);
+        //SET TITLE, ALLOW BACK ARROW IN TOP LEFT CORNER TO FINISH ACTIVITY, AND SET COLOR
         this.getSupportActionBar().setTitle("Profile Picture Selection");
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         this.getSupportActionBar().setBackgroundDrawable(new ColorDrawable(AppUtils.PRIMARY_COLOR));
@@ -24,6 +25,7 @@ public class IconSelect extends AppCompatActivity {
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        //SHOW ICON SELECT FRAGMENT
         super.onPostCreate(savedInstanceState);
         IconSelectFragment fragment = new IconSelectFragment();
         Bundle bundle = new Bundle();
@@ -34,6 +36,7 @@ public class IconSelect extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //FINISH ACTIVITY WHEN BACK BUTTON IN TOP LEFT CORNER IS PRESSED
         switch(item.getItemId()){
             case android.R.id.home:
                 finish();
