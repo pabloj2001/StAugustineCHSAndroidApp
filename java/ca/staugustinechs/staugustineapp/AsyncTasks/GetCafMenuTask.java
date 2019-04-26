@@ -34,11 +34,13 @@ public class GetCafMenuTask extends AsyncTask<String, Void, List<CafMenuItem>> {
 
     public GetCafMenuTask(CafMenuFragment cafMenuFragment, boolean dailyMenu){
         this.cafMenuFragment = cafMenuFragment;
+        //USED TO KNOW WHETHER TO FETCH THE REGULAR OR DAILY MENU
         this.dailyMenu = dailyMenu;
     }
 
     @Override
     protected List<CafMenuItem> doInBackground(String... strings) {
+        //GET CAF MENU DEPENDING ON WHETHER WE'RE GETTING THE DAILY MENU OR REGULAR MENU
         Task<DocumentSnapshot> task = FirebaseFirestore.getInstance().collection("info")
                 .document(dailyMenu ? "cafMenu" : "cafMenuRegular").get();
 
@@ -47,6 +49,8 @@ public class GetCafMenuTask extends AsyncTask<String, Void, List<CafMenuItem>> {
         if(task.isSuccessful()){
             List<CafMenuItem> items = new ArrayList<CafMenuItem>();
             for(Map.Entry<String, Object> entry : task.getResult().getData().entrySet()){
+                //GO THROUGH EACH ENTRY PAIR (KEY: ITEM NAME, VALUE: PRICE)
+                //CREATE EACH CAF MENU ITEM AND SAVE THEM INTO THE ARRAY
                 items.add(new CafMenuItem(entry.getKey(),
                         entry.getValue() instanceof Long ? (long) entry.getValue() : (double) entry.getValue()));
             }
@@ -59,6 +63,7 @@ public class GetCafMenuTask extends AsyncTask<String, Void, List<CafMenuItem>> {
     @Override
     protected void onPostExecute(List<CafMenuItem> items) {
         if(!this.isCancelled()){
+            //RETURN ITEMS TO CAF MENU FRAGMENT
             cafMenuFragment.updateMenu(items, dailyMenu);
         }
     }
