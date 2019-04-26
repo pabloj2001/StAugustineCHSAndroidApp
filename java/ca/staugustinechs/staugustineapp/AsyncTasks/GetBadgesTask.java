@@ -35,11 +35,13 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
     private Profile profile;
     private Activity activity;
 
+    //CONSTRUCTOR FOR WHEN BADGES ARE BEING FETCHED FOR A CLUB
     public GetBadgesTask(ClubDetails clubDetails){
         this.clubDetails = clubDetails;
         this.club = clubDetails.getClub();
     }
 
+    //CONSTRUCTOR FOR WHEN BADGES ARE BEING FETCHED FOR A USER
     public GetBadgesTask(Profile profile){
         this.profile = profile;
     }
@@ -55,8 +57,9 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
     }
 
     private List<Badge> getBadges() {
-        List<DocumentSnapshot> docs = new ArrayList<DocumentSnapshot>();;
+        List<DocumentSnapshot> docs = new ArrayList<DocumentSnapshot>();
         if(clubDetails != null){
+            //LOOK FOR BADGES WHERE THE CLUB IS THE SAME AS THE CLUB PROVIDED
             Task<QuerySnapshot> querySnapshotTask = FirebaseFirestore.getInstance().collection("badges")
                     .whereEqualTo("club", club.getId()).get()
                     .addOnFailureListener(this);
@@ -68,6 +71,7 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
             }
         }else{
             for(String badgeId : profile.getProfile().getBadges()){
+                //GET ALL OF THE USER'S BADGES SEPARATELLY
                 Task<DocumentSnapshot> docSnapshotTask = FirebaseFirestore.getInstance()
                         .collection("badges")
                         .document(badgeId).get()
@@ -84,9 +88,11 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
         if (docs != null) {
             List<Badge> badges = new ArrayList<Badge>();
             for (DocumentSnapshot doc : docs) {
+                //GET THE BADGE IMAGE
                 String imgName = doc.getString("img");
                 Bitmap img = null;
                 if (imgName != null && !imgName.isEmpty()) {
+                    //GET THE IMAGE'S METADATA
                     Task<StorageMetadata> metaTask = FirebaseStorage.getInstance()
                             .getReference("/badges/" + imgName)
                             .getMetadata();
@@ -97,6 +103,8 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
                         StorageMetadata meta = metaTask.getResult();
                         String imgName2 = imgName + "_" + meta.getUpdatedTimeMillis();
                         if (AppUtils.shouldGetFile(imgName2, activity)) {
+                            //IF WE DON'T HAVE THE IMAGE DOWNLOADED, DO SO
+                            //FIRST, GET THE IMAGE URL
                             Task<Uri> uriTask = FirebaseStorage.getInstance()
                                     .getReference("/badges/" + imgName)
                                     .getDownloadUrl();
@@ -105,6 +113,7 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
 
                             if (uriTask.isSuccessful()) {
                                 try {
+                                    //THEN DOWNLOAD THE IMAGE WITH PICASSO AND CROP TO OUR LIKING
                                     img = Picasso.with(activity)
                                             .load(uriTask.getResult())
                                             .transform(new CropCircleTransformation())
@@ -112,18 +121,21 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
                                             .centerInside()
                                             .get();
 
+                                    //SAVE THE IMAGE TO CACHE
                                     AppUtils.saveImg(img, imgName, meta.getUpdatedTimeMillis(), activity);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             }
                         } else {
+                            //IF WE ALREADY HAVE THE IMAGE, LOAD IT
                             img = AppUtils.getImg(imgName2, activity);
                         }
                     }
                 }
 
                 if(doc.getData() != null){
+                    //CRETE BADGE OBJECT WITH BADGE DATA AND IMAGE
                     Badge badge = new Badge(doc.getId(), doc.getData(), imgName, img);
                     badges.add(badge);
                 }
@@ -139,6 +151,7 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
     protected void onPostExecute(List<Badge> badges) {
         if(badges != null){
             if(!this.isCancelled()){
+                //GIVE BADGES TO THE ACTIVITY THAT REQUESTED THEM
                 ((BadgeGetter) activity).updateBadges(badges);
             }
         }else{
