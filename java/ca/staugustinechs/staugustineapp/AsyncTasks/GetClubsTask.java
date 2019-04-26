@@ -34,11 +34,13 @@ public class GetClubsTask extends AsyncTask<String, Void, List<ClubItem>> implem
     private Profile profile;
     private Activity activity;
 
+    //CONSTRUCTOR FOR GETTING CLUBS FROM THE CLUB FRAGMENT
     public GetClubsTask(ClubsFragment clubsFragment, int mode){
         this.clubsFragment = clubsFragment;
         this.mode = mode;
     }
 
+    //CONSTRUCTOR FOR GETTING CLUBS THAT A USER IS A PART OF
     public GetClubsTask(Profile profile){
         this.profile = profile;
     }
