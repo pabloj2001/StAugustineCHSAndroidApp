@@ -133,7 +133,7 @@ public class Main extends AppCompatActivity
                     //CREATE NOTIFICATIONS CHANNEL
                     MessagingService.createNotificationChannel(this);
 
-                    //SET HOME FRAGMENT
+                    //CREATE HOME FRAGMENT
                     homeFragment = new HomeFragment();
                     homeFragment.setMain(this);
                     changeFragment(homeFragment);
@@ -310,30 +310,37 @@ public class Main extends AppCompatActivity
         // Handle navigation view item clicks here.
         switch (item.getItemId()) {
             case R.id.nav_home:
+                //SWITCH TO HOME FRAGMENT
                 toolbar.setTitle(R.string.app_name);
                 changeFragment(homeFragment);
                 break;
             case R.id.nav_extras:
+                //SWITCH TO CLUBS FRAGMENT
                 toolbar.setTitle("Clubs");
                 changeFragment(new ClubsFragment());
                 break;
             case R.id.nav_caf:
+                //SWITCH TO CAF MENUS FRAGMENT
                 toolbar.setTitle("Cafeteria Menu");
                 changeFragment(new CafMenuFragment());
                 break;
             case R.id.nav_songs:
+                //SWITCH TO SONGS FRAGMENT
                 toolbar.setTitle("Song Requests");
                 changeFragment(new SongsFragment());
                 break;
             case R.id.nav_meter:
+                //SWITCH TO SPIRIT METERS FRAGMENT
                 toolbar.setTitle("Spirit Meters");
                 changeFragment(new SpiritMetersFragment());
                 break;
             case R.id.nav_titanTag:
+                //SWITCH TO TITAN TAG FRAGMENT
                 toolbar.setTitle("Titan Tag");
                 changeFragment(new TitanTagFragment());
                 break;
             case R.id.nav_settings:
+                //SWITCH TO SETTINGS FRAGMENT
                 toolbar.setTitle("Settings");
                 changeFragment(new SettingsFragment());
                 break;
@@ -346,6 +353,7 @@ public class Main extends AppCompatActivity
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.navGroup && AppUtils.isNetworkAvailable(this)) {
+            //CLOSE THE DRAWER AND LAUNCH PROFILE ACTIVITY
             drawer.closeDrawer(GravityCompat.START);
             Intent intent = new Intent(this, Profile.class);
             intent.putExtra("USER_EMAIL", "");
@@ -380,6 +388,7 @@ public class Main extends AppCompatActivity
 
     @Override
     public void onResume() {
+        //IF THE USER HAS CHANGED THEIR ICON, UPDATE THE DRAWER WITH THE NEW ICON
         if (UPDATE_ICON) {
             UPDATE_ICON = false;
             updateUserInfo();
