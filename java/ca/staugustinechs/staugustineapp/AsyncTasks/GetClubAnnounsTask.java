@@ -49,6 +49,7 @@ public class GetClubAnnounsTask extends AsyncTask<String, Void, List<ClubAnnounc
 
     private List<ClubAnnouncement> getClubAnnouns() {
         List<ClubAnnouncement> announs = new ArrayList<ClubAnnouncement>();
+        //QUERY ANNOUNCEMENTS WHOSE CLUB IS EQUAL TO THE CLUB PROVIDED
         Task<QuerySnapshot> querySnapshotTask = FirebaseFirestore.getInstance()
                 .collection("announcements")
                 .whereEqualTo("club", clubId)
@@ -58,6 +59,7 @@ public class GetClubAnnounsTask extends AsyncTask<String, Void, List<ClubAnnounc
 
         if (querySnapshotTask.isSuccessful()) {
             for (DocumentSnapshot doc : querySnapshotTask.getResult().getDocuments()) {
+                //GET ANNOUNCEMENT IMAGES IF IT HAS ONE
                 String imgName = doc.getString("img");
                 Bitmap img = null;
                 if (imgName != null && !imgName.isEmpty()) {
@@ -96,6 +98,7 @@ public class GetClubAnnounsTask extends AsyncTask<String, Void, List<ClubAnnounc
                     }
                 }
 
+                //CREATE CLUB ANNOUNCEMENT OBJECT WITH THE DATA AND IMAGE
                 ClubAnnouncement announ = new ClubAnnouncement(doc.getData(), img, doc.getId());
                 announs.add(announ);
             }
@@ -108,6 +111,7 @@ public class GetClubAnnounsTask extends AsyncTask<String, Void, List<ClubAnnounc
     protected void onPostExecute(List<ClubAnnouncement> announs) {
         if(announs != null){
             if(!this.isCancelled()){
+                //RETURN ANNOUNCEMENTS TO GETTER
                 isFinished = true;
                 getter.updateAnnouns(announs);
             }
