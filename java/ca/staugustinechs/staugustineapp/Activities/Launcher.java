@@ -19,10 +19,13 @@ public class Launcher extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         //FIREBASE REMOTE CONFIG
         final FirebaseRemoteConfig frc = FirebaseRemoteConfig.getInstance();
+        //IF IT HAS BEEN LESS THAN 360 SECONDS, WE DON'T GET THE LATEST RC VALUES
+        //AND INSTEAD USE THE ONES WE HAVE SAVED IN CACHE
         frc.fetch(360).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
+                    //USE RC VALUES WE HAVE FETCHED
                     frc.activateFetched();
                 }
                 //SET RC VARIABLES
