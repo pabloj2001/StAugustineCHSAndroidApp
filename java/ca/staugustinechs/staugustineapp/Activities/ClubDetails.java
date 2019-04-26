@@ -749,6 +749,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
     }
 
     public void createBadge(Uri selectedImage, String desc, final boolean clubBadge) {
+        //COMPILE DATA INTO MAP
         final Map<String, Object> data = new HashMap<String, Object>();
         data.put("club", club.getId());
         data.put("desc", desc);
@@ -759,6 +760,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
 
         showPostSnack(11);
 
+        //UPLOAD BADGE IMAGE
         byte[] imgBytes = AppUtils.getImgBytes(selectedImage, 300, 300, this);
         AppUtils.uploadImg(imgName, imgBytes, "badges/",
                 new OnCompleteListener() {
@@ -766,7 +768,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                     public void onComplete(@NonNull Task task) {
                         final DocumentReference doc = FirebaseFirestore.getInstance()
                                 .collection("badges").document();
-
+                        //UPLOAD BADGE DATA
                         doc.set(data).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -780,6 +782,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if(task.isSuccessful()){
+                                                            //RESTART CLUB TO SEE BADGE
                                                             showPostSnack(12);
                                                             restartClub();
                                                         }else{
@@ -818,10 +821,12 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         showPostSnack(14);
 
         if(selectedImage != null){
+            //IF THE USER WANTS TO MAKE THE BADGE A NEW IMAGE, UPLOAD IT
             byte[] imgBytes = AppUtils.getImgBytes(selectedImage, 300, 300, this);
             AppUtils.uploadImg(imgName, imgBytes, "badges/", null);
         }
 
+        //UPDATE BADGE DATA
         FirebaseFirestore.getInstance().collection("badges")
                 .document(club.getClubBadge())
                 .update("desc", desc)
@@ -838,6 +843,9 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 });
     }
 
+    //THERE'S NOT MUCH NEED FOR SETTINGS THIS ACTIVITY TO BE OFFLINE
+    //SINCE YOU CAN'T ACCESS IT IF YOU DON'T HAVE WIFI SINCE YOU WON'T BE ABLE
+    //TO SEE THE CLUBS FRAGMENT IN THE MAIN ACTIVITY TO ACCESS THIS CLUB
     public void setOffline(){
         /*layout.addView(offline);
         progressBar.setVisibility(View.GONE);
@@ -958,6 +966,9 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //DON'T KNOW WHAT THIS DOES OR WHY IT'S HERE TBH....
+        //NVM I REMEMBERED WHAT IT'S FOR! THIS BASICALLY DETECTS
+        //IF THE USER HAS SWIPED RIGHT AND IF SO FINISHES THE ACTIVITY.
+        //KINDA LIKE HOW iPHONES GO BACK A SCREEN WHEN HYOU SWIPE RIGHT
         super.onTouchEvent(event);
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
@@ -984,46 +995,65 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
         return onTouchEvent(event);
     }
 
+    //THIS IS PROBABLY THE DUMBEST THING I HAVE EVER PROGRAMMED.
+    //INSTEAD OF GETTING THE MENU ITEMS AND SAVING THEM INTO VARIABLES,
+    //I GET THEM EVERY SINGLE TIME I WANT TO MODIFY THEM, THE ONLY THING I SAVE
+    //IS THEIR ID SO I CAN REFER TO THEM IN THE onMenuItemClick METHOD....
+    //GOTTA REDO THIS METHOD AT SOME POINT.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if(isAdmin){
+            //SHOW THE ADMIN MENU ITEMS
             getMenuInflater().inflate(R.menu.options_clubadmin, menu);
+            //MEMBER LIST MENU ITEM
             itemMemberList = menu.getItem(0).getItemId();
             menu.getItem(0).setOnMenuItemClickListener(this);
+            //IF THE CLUB IS REQUEST TO JOIN, SHOW THE PENDING LIST MENU ITEM, OTHERWISE DON'T.
             if(club.getJoinPref() == 1){
                 itemPendingList = menu.getItem(1).getItemId();
                 menu.getItem(1).setOnMenuItemClickListener(this);
             }else{
                 menu.getItem(1).setVisible(false);
             }
+            //EDIT CLUB MENU ITEM
             itemEditClub = menu.getItem(2).getItemId();
             menu.getItem(2).setOnMenuItemClickListener(this);
+            //IF A CLUB BADGE EXISTS, CHANGE "Edit Club Badge" ITEM TO "Create Club Badge"
             itemClubBadge = menu.getItem(3).getItemId();
             if(club.getClubBadge() == null || club.getClubBadge().isEmpty()){
                 menu.getItem(3).setTitle("Create Club Badge");
             }
             menu.getItem(3).setOnMenuItemClickListener(this);
+            //CHANGE THE NAME OF THE TOGGLE NOTIFICATIONS MENU ITEM DEPENDING
+            //ON IF THE USER HAS NOTIFICATIONS ON OR OFF
             itemToggleNotifs = menu.getItem(4).getItemId();
             if(!Main.PROFILE.getNotifications().contains(club.getId())){
                 menu.getItem(4).setTitle("Enable Notifications");
             }
             menu.getItem(4).setOnMenuItemClickListener(this);
+            //LEAVE CLUB MENU ITEM
             itemLeaveClub = menu.getItem(5).getItemId();
             menu.getItem(5).setOnMenuItemClickListener(this);
         }else{
             if(isMember || club.getPendingList().contains(Main.PROFILE.getUid())) {
+                //SHOW THE MEMBER MENU ITEMS
                 getMenuInflater().inflate(R.menu.options_club, menu);
+                //LEAVE CLUB MENU ITEM
                 itemLeaveClub = menu.getItem(2).getItemId();
                 menu.getItem(2).setOnMenuItemClickListener(this);
                 if (isMember) {
+                    //MEMBER LIST MENU ITEM
                     itemMemberList = menu.getItem(0).getItemId();
                     menu.getItem(0).setOnMenuItemClickListener(this);
+                    //CHANGE THE NAME OF THE TOGGLE NOTIFICATIONS MENU ITEM DEPENDING
+                    //ON IF THE USER HAS NOTIFICATIONS ON OR OFF
                     itemToggleNotifs = menu.getItem(1).getItemId();
                     if(!Main.PROFILE.getNotifications().contains(club.getId())){
                         menu.getItem(1).setTitle("Enable Notifications");
                     }
                     menu.getItem(1).setOnMenuItemClickListener(this);
                 } else {
+                    //CHANGE NAME OF LEAVE CLUB MENU ITEM TO "Cancel Application"
                     menu.getItem(0).setVisible(false);
                     menu.getItem(2).setTitle("Cancel Application");
                 }
@@ -1035,23 +1065,28 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         if(item.getItemId() == itemMemberList){
+            //OPEN CLUB MEMBERS LIST ACTIVITY
             Intent intent = new Intent(this, ClubMemberList.class);
             intent.putExtra("CLUB", club.pack());
             intent.putExtra("PENDING", false);
             startActivity(intent);
         }else if(item.getItemId() == itemPendingList){
+            //OPEN CLUB PENDING LIST ACTIVITY
             Intent intent = new Intent(this, ClubMemberList.class);
             intent.putExtra("CLUB", club.pack());
             intent.putExtra("PENDING", true);
             startActivity(intent);
         }else if(item.getItemId() == itemEditClub){
+            //SHOW EDIT CLUB DIALOG
             EditClubDialog dialog = new EditClubDialog();
             dialog.setClubDetails(this);
             dialog.show(this.getSupportFragmentManager(), "editClubDialog");
         }else if(item.getItemId() == itemClubBadge){
+            //SHOW CREATE BADGE DIALOG
             final CreateBadgeDialog dialog = new CreateBadgeDialog();
             dialog.setClubDetails(this);
             if(club.getClubBadge() != null && !club.getClubBadge().isEmpty()){
+                //IF A CLUB BADGE EXISTS, PASS IT DOWN SO WE CAN EDIT IT
                 for(Badge badge : this.badges){
                     if(badge.getId().equals(club.getClubBadge())){
                         dialog.setBadge(badge);
@@ -1060,12 +1095,15 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                     }
                 }
             }else{
+                //TELL DIALOG WE ARE MAKING A CLUB BADGE
                 dialog.setClubBadge(true);
                 dialog.show(this.getSupportFragmentManager(), "createClubBadgeDialog");
             }
         }else if(item.getItemId() == itemToggleNotifs){
+            //TOGGLE NOTIFICATIONS
             Snackbar.make(cdBanner, "Updating Notification Preferences....", Snackbar.LENGTH_LONG).show();
             if(!Main.PROFILE.getNotifications().contains(club.getId())){
+                //SUBSCRIBE TO CLUB NOTIFICATIONS
                 Main.PROFILE.addNotification(club.getId(), new OnCompleteListener() {
                     @Override
                     public void onComplete(@NonNull Task task) {
@@ -1080,6 +1118,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                     }
                 });
             }else{
+                //UNSUBSCRIBE FROM CLUB NOTIFICATIONS
                 Main.PROFILE.removeNotification(club.getId(), new OnCompleteListener() {
                     @Override
                     public void onComplete(@NonNull Task task) {
@@ -1095,6 +1134,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
                 });
             }
         }else if(item.getItemId() == itemLeaveClub){
+            //ASK USER IF THEY REALLY WANNA LEAVE THE CLUB
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             if(isMember){
                 builder.setMessage("Are you sure you want to leave " + club.getName().trim() + "?");
@@ -1104,6 +1144,7 @@ public class ClubDetails extends AppCompatActivity implements View.OnClickListen
             builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    //REMOVE USER FROM CLUB, FINISH THE ACTIVITY, AND REFRESH CLUBS
                     club.removeMember(Main.PROFILE);
                     restartClub();
                     dialog.dismiss();
