@@ -64,12 +64,14 @@ public class GetClubsTask extends AsyncTask<String, Void, List<ClubItem>> implem
     }
 
     private List<ClubItem> getClubs(String userId) {
+        //GET CLUBS WHERE USER IS AN ADMIN
         Task<QuerySnapshot> clubAdminTask = FirebaseFirestore.getInstance().collection("clubs")
                 .whereArrayContains("admins", userId).get()
                 .addOnFailureListener(this);
 
         while (!clubAdminTask.isComplete()) { }
 
+        //GET CLUBS WHERE USER IS A MEMBER
         Task<QuerySnapshot> clubMemberTask = FirebaseFirestore.getInstance().collection("clubs")
                 .whereArrayContains("members", userId).get()
                 .addOnFailureListener(this);
@@ -78,10 +80,14 @@ public class GetClubsTask extends AsyncTask<String, Void, List<ClubItem>> implem
 
         if (clubAdminTask.isSuccessful() && clubMemberTask.isSuccessful()) {
             List<DocumentSnapshot> queryDocs = clubAdminTask.getResult().getDocuments();
+            //COMBINE THE ADMINS AND MEMBERS DOCUMENTS
             queryDocs.addAll(clubMemberTask.getResult().getDocuments());
             if(mode == 0){
+                //IF WE ARE ONLY GETTING THE CLUBS THE USER IS A PART OF, GET AND RETURN THOSE
                 return getClubItems(queryDocs);
             }else{
+                //IF WE ARE GETTING THE CLUBS THE USER IS NOT A PART OF,
+                //GET ALL THE CLUBS
                 Task<QuerySnapshot> clubAllTask = FirebaseFirestore.getInstance()
                         .collection("clubs").get()
                         .addOnFailureListener(this);
@@ -90,7 +96,9 @@ public class GetClubsTask extends AsyncTask<String, Void, List<ClubItem>> implem
 
                 if(clubAllTask.isSuccessful()){
                     List<DocumentSnapshot> allDocs = clubAllTask.getResult().getDocuments();
+                    //REMOVE THE CLUBS THE USER IS A PART OF FROM ALL OF THE CLUBS
                     allDocs.removeAll(queryDocs);
+                    //GET AND RETURN THE CLUBS
                     return getClubItems(allDocs);
                 }
             }
@@ -105,6 +113,7 @@ public class GetClubsTask extends AsyncTask<String, Void, List<ClubItem>> implem
             Bitmap img = null;
             String imgName2 = "";
             if(!imgName.isEmpty()){
+                //GET THE BANNER FOR EACH CLUBS
                 Task<StorageMetadata> metaTask = FirebaseStorage.getInstance()
                         .getReference("/clubBanners/" + imgName)
                         .getMetadata();
@@ -141,9 +150,11 @@ public class GetClubsTask extends AsyncTask<String, Void, List<ClubItem>> implem
                 }
             }
 
+            //MAKE THE CLUBS ITEM FROM THE DATA AND BANNER IMAGE
             ClubItem club = new ClubItem(doc.getId(), doc.getData(), img, imgName2);
             clubItems.add(club);
         }
+        //RETURN THE LIST OF THE CLUBS
         return clubItems;
     }
 
@@ -151,6 +162,7 @@ public class GetClubsTask extends AsyncTask<String, Void, List<ClubItem>> implem
     protected void onPostExecute(List<ClubItem> clubItems) {
         if(clubItems != null){
             if(!this.isCancelled()){
+                //RETURN LIST OF CLUBS TO CALLING CLASS
                 if(clubsFragment != null){
                     clubsFragment.updateClubs(clubItems);
                 }else{
