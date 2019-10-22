@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import ca.staugustinechs.staugustineapp.Objects.QuestionAnswer;
 import ca.staugustinechs.staugustineapp.R;
 
-@SuppressWarnings("ALL")
 public class RViewAdapter_Faq extends RecyclerView.Adapter<RViewAdapter_Faq.QuestionViewHolder> {
     private ArrayList<QuestionAnswer> questionAnswers;
     private final LayoutInflater inflater;
