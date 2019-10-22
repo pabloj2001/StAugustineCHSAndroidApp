@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:id="@+id/homeSwipeRefresh">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:id="@+id/homeScrollView">
+
+        <LinearLayout
+            android:id="@+id/homeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/snowDay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/holo_red_light"
+                android:gravity="center_horizontal"
+                android:padding="8dp"
+                android:text="All buses have been cancelled today!"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:visibility="gone" />
+
+            <RelativeLayout
+                android:id="@+id/dateGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorAccent"
+                android:padding="8dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:gravity="center"
+                    android:text="TODAY"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/dayNum"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/date"
+                    android:gravity="center"
+                    android:text="DAY 3"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <ProgressBar
+                android:id="@+id/homeLoadingCircle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="@dimen/loadingCirclePadding" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="6dp"
+                android:textAlignment="center"
+                android:visibility="gone"
+                android:id="@+id/homeTopSong"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="21sp"
+                android:textAlignment="center"
+                android:text="COULDN'T LOAD SCHOOL ANNOUNCEMENTS"
+                android:paddingTop="12dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:visibility="gone"
+                android:id="@+id/homeAnnounError"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:focusable="false"
+                android:id="@+id/homeAnnouncements" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:id="@+id/homeClubGroup">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:textAlignment="center"
+                    android:text="Club Announcements"
+                    android:textColor="@color/colorPrimary"
+                    android:paddingTop="8dp"
+                    android:id="@+id/homeClubAnnounsHeader"/>
+
+                <include
+                    android:id="@+id/homeClubAnnouncements"
+                    layout="@layout/recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <ProgressBar
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:visibility="gone"
+                    android:id="@+id/homeClubLoading"/>
+
+            </LinearLayout>
+
+            <Button
+                style="@style/buttonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"
+                android:text="View Calendar"
+                android:textSize="24sp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="12dp"
+                android:id="@+id/calendar"/>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</android.support.v4.widget.SwipeRefreshLayout>

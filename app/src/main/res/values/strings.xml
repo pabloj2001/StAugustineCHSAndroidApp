@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">St. Augustine CHS</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="newsSiteUrl">https://www.staugustinechs.ca/printable</string>
+    <string name="signInMessage">SIGN IN WITH YOUR\nYCDSB ACCOUNT TO CONTINUE</string>
+    <string name="scriptId">M4mEiRp5y5-lCa01NFoeSIAExKb2sehiP</string>
+    <string name="web_client_id">448336593725-o8h11bnj9kh32lc8kk6pvgdeknfj3it2.apps.googleusercontent.com</string>
+    <string name="default_notification_channel_id">DEFAULT_NOTIFICATION_IDBLEH</string>
+
+    <!--Add faq screen questions here-->
+    <string-array name="faq_questions">
+        <item>If I spend my spirit points, does it take away from the spirit points of my grade?</item>
+        <item>How do I keep my school information private?</item>
+        <item>How do you get more badges? Will each club have one?</item>
+        <item>What does “Clear Cache” do?</item>
+        <item>Does the app update for snow days on the home page?</item>
+        <item>How do you earn points to spend on profile pics?</item>
+        <item>Will the caf menu be updated the night before or the morning of?</item>
+        <item>Is there a place in the app or somewhere we can put suggestions and report bugs?</item>
+        <item>What is the difference between club announcements and school wide announcements?</item>
+        <item>Can I log into my account on multiple devices?</item>
+    </string-array>
+
+    <!--Add faq screen answers here-->
+    <string-array name="faq_answers">
+        <item>No. Although the spirit points you gain individually are added to your grades overall spirit meter, these points will not be taken away once you decide to spend them. </item>
+        <item>To ensure other students cannot see your courses or clubs, go to the home screen and click the three dots on the top left corner, and then go into settings. From there, turn on the toggle switch to keep classes and clubs private</item>
+        <item>You can get more badges by joining different clubs, however, badges can only be earned once you have been accepted into the club by your club administrator. No, not all clubs have badges. It is up to the club administrator if they wish to add them.</item>
+        <item>We store images on the app so that it runs smooth. By clearing cache, you will save storage on your device. The app will still be able to run, however, loading time may take a bit longer. </item>
+        <item>Yes. The app gets its information directly from School Bus City, therefore once updates have been posted on the website, the app will update as well by posting it on the home page as well as sending out a notification (if notifications are on). </item>
+        <item>You can earn points by joining clubs which require approval from the administrator. From there you are free to use your points on whatever you wish (ie. song requests, new profile pictures, etc.)</item>
+        <item>The caf menu will be updated on the app the morning of, as this is when the cafeteria posts that day’s menu.</item>
+        <item>Yes! You can find it in the app settings.</item>
+        <item>Club announcements</item>
+        <item>Yes, however, the notifications will only appear on the last signed in device</item>
+    </string-array>
+
+
+</resources>

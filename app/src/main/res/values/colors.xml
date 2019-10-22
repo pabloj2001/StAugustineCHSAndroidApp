@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#8d1230</color>
+    <color name="colorPrimaryDark">#460817</color>
+    <color name="colorAccent">#d8af1c</color>
+    <color name="textColor">#000000</color>
+    <color name="windowBackground">#FAFAFA</color>
+    <color name="drawerBackground">@android:color/white</color>
+    <color name="cardViewBackground">#FFFFFF</color>
+</resources>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="21sp"
+        android:textColor="@color/colorAccent"
+        android:background="@color/colorPrimaryDark"
+        android:textAlignment="center"
+        android:padding="6dp"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:id="@+id/songsTheme"/>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/songsRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@id/songsTheme">
+
+        <RelativeLayout
+            android:id="@+id/songsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:id="@+id/songsLoadingCircle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="@dimen/loadingCirclePadding" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="There are no songs right now. How about requesting one?"
+                android:textSize="36sp"
+                android:textAlignment="center"
+                android:paddingTop="100dp"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:visibility="gone"
+                android:id="@+id/songsError"/>
+
+            <android.support.v4.widget.NestedScrollView
+                android:id="@+id/songsGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <include
+                        layout="@layout/recyclerview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+            </android.support.v4.widget.NestedScrollView>
+
+            <!-- <android.support.design.widget.FloatingActionButton
+                 android:id="@+id/superVote"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_above="@id/addSong"
+                 android:layout_alignParentEnd="true"
+                 android:layout_marginEnd="18dp"
+                 android:backgroundTint="@android:color/white"
+                 android:src="@drawable/ic_baseline_whatshot_24px"
+                 android:visibility="gone" />
+                 android:tint="@color/colorAccent"-->
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/addSong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="18dp"
+                android:src="@drawable/ic_round_playlist_add_24px"
+                android:tint="@android:color/white"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+</RelativeLayout>

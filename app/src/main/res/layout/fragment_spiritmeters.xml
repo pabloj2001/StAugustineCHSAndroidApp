@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Grade 9"
+            android:textSize="24sp"
+            android:paddingStart="18dp"
+            android:id="@+id/grade9text"/>
+
+        <ProgressBar
+            android:id="@+id/grade9bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:scaleY="5"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Grade 10"
+            android:textSize="24sp"
+            android:paddingStart="18dp"
+            android:id="@+id/grade10text"/>
+
+        <ProgressBar
+            android:id="@+id/grade10bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:scaleY="5"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Grade 11"
+            android:textSize="24sp"
+            android:paddingStart="18dp"
+            android:id="@+id/grade11text"/>
+
+        <ProgressBar
+            android:id="@+id/grade11bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:scaleY="5"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Grade 12"
+            android:textSize="24sp"
+            android:paddingStart="18dp"
+            android:id="@+id/grade12text"/>
+
+        <ProgressBar
+            android:id="@+id/grade12bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:scaleY="5"/>
+
+    </LinearLayout>
+
+</LinearLayout>

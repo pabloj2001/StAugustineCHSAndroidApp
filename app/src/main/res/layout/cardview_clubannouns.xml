@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:clickable="true"
+        android:id="@+id/cdAnnounGroup">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textAlignment="center"
+            android:padding="1dp"
+            android:visibility="gone"
+            android:id="@+id/cdAnnounClub"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textAlignment="center"
+            android:padding="1dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:layout_below="@id/cdAnnounClub"
+            android:id="@+id/cdAnnounDate"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/colorPrimary"
+            android:layout_below="@id/cdAnnounDate"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:id="@+id/cdAnnounTitle"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:layout_below="@id/cdAnnounTitle"
+            android:paddingTop="2dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:autoLink="web|email"
+            android:id="@+id/cdAnnounContent"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/cdAnnounContent"
+            android:paddingTop="4dp"
+            android:adjustViewBounds="true"
+            android:id="@+id/cdAnnounImg"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:text="Go to club page to see attached image."
+            android:layout_below="@id/cdAnnounContent"
+            android:visibility="gone"
+            android:paddingTop="4dp"
+            android:id="@+id/cdAnnounImgError"/>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/cdAnnounImg">
+            <!--android:layout_alignParentStart="true"
+            android:paddingStart="5dp"-->
+
+            <ImageView
+                android:id="@+id/cdAnnounCreatorImg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxHeight="30dp"
+                android:maxWidth="30dp"
+                android:minWidth="30dp"
+                android:minHeight="30dp"
+                android:visibility="gone"
+                android:adjustViewBounds="true"/>
+
+            <TextView
+                android:id="@+id/cdAnnounCreator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:paddingTop="6dp"
+                android:paddingStart="8dp"
+                android:layout_toEndOf="@id/cdAnnounCreatorImg"/>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
