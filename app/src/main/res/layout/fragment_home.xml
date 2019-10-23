@@ -35,7 +35,6 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorAccent"
                 android:padding="8dp"
-                android:layout_marginBottom="4dp"
                 android:visibility="gone">
 
                 <TextView
@@ -89,6 +88,7 @@
                 android:id="@+id/homeAnnounError"/>
 
             <android.support.v7.widget.RecyclerView
+                android:padding="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
@@ -136,9 +136,8 @@
                 android:visibility="gone"
                 android:text="View Calendar"
                 android:textSize="24sp"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginTop="2dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
                 android:layout_marginBottom="12dp"
                 android:id="@+id/calendar"/>
 

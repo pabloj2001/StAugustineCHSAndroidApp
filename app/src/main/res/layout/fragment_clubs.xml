@@ -42,6 +42,8 @@
                     android:id="@+id/extrasBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    style="@style/buttonStyle"
+                    android:padding="6dp"
                     android:layout_gravity="center_horizontal"
                     android:text="JOIN OTHER CLUBS!"
                     android:layout_marginTop="8dp"

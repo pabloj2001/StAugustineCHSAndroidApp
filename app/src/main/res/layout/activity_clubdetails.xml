@@ -60,8 +60,10 @@
                     <Button
                         android:id="@+id/cdJoinBtn"
                         android:layout_width="wrap_content"
+                        style="@style/buttonStyle"
                         android:layout_height="wrap_content"
                         android:text="JOIN CLUB!"
+                        android:padding="6dp"
                         android:layout_marginBottom="10dp"
                         android:layout_gravity="center_horizontal"
                         android:textSize="24sp"

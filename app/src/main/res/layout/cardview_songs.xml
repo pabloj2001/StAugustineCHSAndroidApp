@@ -28,7 +28,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_alignParentTop="true"
                 android:src="@drawable/ic_round_expand_less_24px"
-                android:tint="@android:color/black"
+                android:tint="@color/textColor"
                 android:id="@+id/upvoteImg"/>
             <!--android:tint="@android:color/holo_green_light"-->
 

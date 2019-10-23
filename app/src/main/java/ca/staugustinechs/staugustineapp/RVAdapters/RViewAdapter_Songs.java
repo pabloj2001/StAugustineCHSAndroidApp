@@ -97,7 +97,7 @@ public class RViewAdapter_Songs extends RecyclerView.Adapter<RViewAdapter_Songs.
         }else{
             if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
                 changeColors(holder.upvoteGroup, android.R.color.white);
-            } else {
+            } else if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO) {
                 changeColors(holder.upvoteGroup, android.R.color.black);
             }
             holder.upvoteGroup.setOnLongClickListener(new View.OnLongClickListener() {
