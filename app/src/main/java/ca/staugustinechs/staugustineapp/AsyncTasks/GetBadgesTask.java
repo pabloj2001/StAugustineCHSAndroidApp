@@ -4,7 +4,8 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -114,7 +115,7 @@ public class GetBadgesTask extends AsyncTask<String, Void, List<Badge>> implemen
                             if (uriTask.isSuccessful()) {
                                 try {
                                     //THEN DOWNLOAD THE IMAGE WITH PICASSO AND CROP TO OUR LIKING
-                                    img = Picasso.with(activity)
+                                    img = Picasso.get()//with(activity)
                                             .load(uriTask.getResult())
                                             .transform(new CropCircleTransformation())
                                             .resizeDimen(R.dimen.badge_size, R.dimen.badge_size)

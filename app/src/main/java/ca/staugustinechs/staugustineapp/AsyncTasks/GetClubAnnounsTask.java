@@ -4,7 +4,8 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -79,7 +80,7 @@ public class GetClubAnnounsTask extends AsyncTask<String, Void, List<ClubAnnounc
 
                             if (uriTask.isSuccessful()) {
                                 try {
-                                    img = Picasso.with(activity)
+                                    img = Picasso.get()//with(activity)
                                             .load(uriTask.getResult())
                                             .resizeDimen(R.dimen.img_height, R.dimen.img_height)
                                             .centerInside()

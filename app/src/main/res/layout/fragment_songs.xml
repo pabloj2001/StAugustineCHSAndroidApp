@@ -16,7 +16,7 @@
         android:visibility="gone"
         android:id="@+id/songsTheme"/>
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/songsRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -47,7 +47,7 @@
                 android:visibility="gone"
                 android:id="@+id/songsError"/>
 
-            <android.support.v4.widget.NestedScrollView
+            <androidx.core.widget.NestedScrollView
                 android:id="@+id/songsGroup"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -66,7 +66,7 @@
 
                 </LinearLayout>
 
-            </android.support.v4.widget.NestedScrollView>
+            </androidx.core.widget.NestedScrollView>
 
             <!-- <android.support.design.widget.FloatingActionButton
                  android:id="@+id/superVote"
@@ -80,7 +80,7 @@
                  android:visibility="gone" />
                  android:tint="@color/colorAccent"-->
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/addSong"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -93,6 +93,6 @@
 
         </RelativeLayout>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </RelativeLayout>

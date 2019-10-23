@@ -4,7 +4,8 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -131,7 +132,7 @@ public class GetClubsTask extends AsyncTask<String, Void, List<ClubItem>> implem
 
                         if (uriTask.isSuccessful()) {
                             try {
-                                Bitmap bmp = Picasso.with(activity)
+                                Bitmap bmp = Picasso.get()//with(activity)
                                         .load(uriTask.getResult())
                                         .get();
 

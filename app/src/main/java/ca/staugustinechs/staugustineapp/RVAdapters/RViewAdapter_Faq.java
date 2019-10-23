@@ -2,14 +2,15 @@ package ca.staugustinechs.staugustineapp.RVAdapters;
 
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
@@ -25,7 +26,6 @@ public class RViewAdapter_Faq extends RecyclerView.Adapter<RViewAdapter_Faq.Ques
         questionAnswers = qList;
     }
 
-    @android.support.annotation.NonNull
     @Override
     public QuestionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = inflater.inflate(R.layout.cardview_faq, parent, false);
@@ -53,7 +53,6 @@ public class RViewAdapter_Faq extends RecyclerView.Adapter<RViewAdapter_Faq.Ques
             });
         }
     }
-
     class QuestionViewHolder extends RecyclerView.ViewHolder {
         private TextView questionTv, answerTv;
         private ImageView expandCollapse;

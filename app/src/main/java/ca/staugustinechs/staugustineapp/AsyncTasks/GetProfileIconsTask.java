@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -132,7 +133,7 @@ public class GetProfileIconsTask extends AsyncTask<Integer, Void, List<ProfileIc
                 if (uriTask.isSuccessful()) {
                     try {
                         int px = AppUtils.getDimen(R.dimen.icon_big_size, activity);
-                        img = Picasso.with(activity)
+                        img = Picasso.get()//with(activity)
                                 .load(uriTask.getResult())
                                 .transform(new CropCircleTransformation())
                                 .resize(px, px)

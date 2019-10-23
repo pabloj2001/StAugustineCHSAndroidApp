@@ -6,13 +6,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 import com.squareup.picasso.Picasso;
 
@@ -162,7 +163,7 @@ public class AddClubAnnounDialog extends DialogFragment {
         if(requestCode == pickPhotoCode){
             if(resultCode == RESULT_OK){
                 selectedImage = data.getData();
-                Picasso.with(this.dialog.getContext())
+                Picasso.get()//with(this.dialog.getContext())
                         .load(selectedImage)
                         .into(imgPreview);
             }

@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:paddingTop="@dimen/loadingCirclePadding" />
 
-    <android.support.v4.widget.NestedScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -76,7 +76,7 @@
                     android:textAlignment="textStart"
                     android:text="Owned" />
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/isOwnedIcons" />
@@ -103,7 +103,7 @@
                     android:text="Available"
                     android:id="@+id/isAvailableText"/>
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/isIcons" />
@@ -112,6 +112,6 @@
 
         </LinearLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>
