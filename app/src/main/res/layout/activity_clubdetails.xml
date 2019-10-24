@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cdSwipeRefresh"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/clubDetailsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/cdScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/cdBanner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:layout_alignParentTop="true"
+                    android:scaleY="1.01"/>
+
+                <TextView
+                    android:id="@+id/cdName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/cdBanner"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@color/colorPrimary"
+                    android:padding="2dp"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="28sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_below="@id/cdName"
+                    android:id="@+id/cdClubGroup">
+
+                    <TextView
+                        android:id="@+id/cdDesc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:padding="8dp"
+                        android:textAlignment="center"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/cdJoinBtn"
+                        android:layout_width="wrap_content"
+                        style="@style/buttonStyle"
+                        android:layout_height="wrap_content"
+                        android:text="JOIN CLUB!"
+                        android:padding="6dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_gravity="center_horizontal"
+                        android:textSize="24sp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/cdClubGroup"
+                    android:textAlignment="center"
+                    android:text="Badges"
+                    android:textSize="24sp"
+                    android:textColor="@color/colorPrimary"
+                    android:paddingTop="4dp"
+                    android:id="@+id/cdBadgesHeader"
+                    android:visibility="gone"/>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/cdBadgesHeader"
+                    android:id="@+id/cdBadgesExtras">
+
+                    <ProgressBar
+                        android:id="@+id/cdLoadingCircle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingTop="6dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/cdBadgesError"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="6dp"
+                        android:text="This club doesn't have badges"
+                        android:textAlignment="center"
+                        android:textSize="18sp"
+                        android:visibility="gone"/>
+
+                </RelativeLayout>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/cdBadgesHeader"
+                    android:id="@+id/cdBadgesGroup">
+
+                    <LinearLayout
+                        android:id="@+id/cdInnerBadgesGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <include
+                            android:id="@+id/cdBadges"
+                            layout="@layout/recyclerview2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone" />
+
+                        <ImageButton
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_round_add_circle_outline_24px"
+                            android:layout_gravity="center_vertical"
+                            android:paddingStart="6dp"
+                            android:paddingEnd="16dp"
+                            android:background="@android:color/transparent"
+                            android:visibility="gone"
+                            android:id="@+id/cdBadgesAdd"/>
+
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+                <TextView
+                    android:id="@+id/cdAnnounHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/cdBadgesExtras"
+                    android:layout_gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="Announcements"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="24sp"
+                    android:visibility="gone" />
+
+                <ProgressBar
+                    android:id="@+id/cdLoadingCircle2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/cdAnnounHeader"
+                    android:layout_gravity="center"
+                    android:paddingTop="6dp"
+                    android:visibility="gone" />
+
+                <include
+                    android:id="@+id/cdAnnouncements"
+                    layout="@layout/recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/cdAnnounHeader"
+                    android:layout_marginBottom="6dp"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/cdAnnounError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/cdAnnounHeader"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:scaleX="2"
+                        android:scaleY="2"
+                        android:src="@drawable/ic_round_notification_important_24px" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="2dp"
+                        android:text="No announcements yet..."
+                        android:textAlignment="center"
+                        android:textSize="26sp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/cdAddAnnouncement"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="18dp"
+            android:clickable="true"
+            android:src="@drawable/ic_round_playlist_add_24px"
+            android:tint="@android:color/white"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/cdName2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/colorPrimary"
+            android:padding="2dp"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
