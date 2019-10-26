@@ -5,17 +5,24 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.widget.RemoteViews;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import ca.staugustinechs.staugustineapp.Fragments.HomeFragment;
 
 /**
  * Implementation of App Widget functionality.
  */
 public class DayWidget extends AppWidgetProvider {
+    public static String day = "Day";
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -29,7 +36,7 @@ public class DayWidget extends AppWidgetProvider {
         final String today = date.format(cal.getTime());
 
         widgetViews.setTextViewText(R.id.date_widg, today);
-        widgetViews.setTextViewText(R.id.day_widg, HomeFragment.dayNumber);
+        widgetViews.setTextViewText(R.id.day_widg, updateDay(today));
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, widgetViews);
     }
@@ -50,6 +57,46 @@ public class DayWidget extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+    }
+
+    public static String updateDay(final String today) {
+        FirebaseFirestore.getInstance().collection("info")
+                .document("dayNumber").get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot doc = task.getResult();
+
+                            if (doc.getBoolean("snowDay")) {
+                                day = "It's a snow day!";
+                            }
+
+                            boolean haveFun = doc.getBoolean("haveFun");
+                            String dayNum = doc.getString("dayNumber");
+                            if (haveFun) {
+                                day = dayNum;
+                            } else {
+                                if (!today.contains("Saturday") && !today.contains("Sunday")) {
+                                    if (dayNum.trim().equals("1") || dayNum.trim().equals("2")) {
+                                        day = "Day " + dayNum;
+                                    } else {
+                                        day = "Day " + dayNum;
+                                    }
+                                } else {
+                                    if (dayNum.trim().equals("1") || dayNum.trim().equals("2")) {
+                                        int finalDay = 1;
+                                        if (dayNum.trim().equals("1")) {
+                                            finalDay = 2;
+                                        }
+                                        day = "On Monday, it will be a Day " + finalDay;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+        return day;
     }
 }
 

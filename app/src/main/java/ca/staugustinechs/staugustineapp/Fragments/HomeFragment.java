@@ -53,8 +53,6 @@ import ca.staugustinechs.staugustineapp.RVAdapters.RViewAdapter_ClubAnnouns;
 import ca.staugustinechs.staugustineapp.RVAdapters.RViewAdapter_Home;
 
 public class HomeFragment extends Fragment implements ClubAnnounGetter {
-    public static String dayNumber = "";
-
     private String CALENDAR_URL = "https://calendar.google.com/calendar/r?" +
             "cid=ycdsbk12.ca_f456pem6p0idarcilfuqiakaa8@group.calendar.google.com" +
             "&cid=ycdsbk12.ca_4tepqngmnt9htbg435bmbpf3tg%40group.calendar.google.com";
@@ -338,7 +336,6 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
 
                             TextView snowDay = getView().findViewById(R.id.snowDay);
                             if (doc.getBoolean("snowDay")) {
-                                dayNumber = "It's a snow day!";
                                 snowDay.setVisibility(View.VISIBLE);
                             } else {
                                 snowDay.setVisibility(View.GONE);
@@ -347,13 +344,11 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
                             boolean haveFun = doc.getBoolean("haveFun");
                             String dayNum = doc.getString("dayNumber");
                             if (haveFun) {
-                                dayNumber = dayNum;
                                 dayView.setText(dayNum);
                             } else {
                                 if (!today.contains("Saturday") && !today.contains("Sunday")) {
                                     if (dayNum.trim().equals("1") || dayNum.trim().equals("2")) {
                                         dayView.setText("Day " + dayNum);
-                                        dayNumber = "Day " + dayNum;
                                     } else {
                                         dayView.setVisibility(View.GONE);
                                         return;
@@ -364,7 +359,6 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
                                         if (dayNum.trim().equals("1")) {
                                             finalDay = 2;
                                         }
-                                        dayNumber = "On Monday it will be a Day " + finalDay;
                                         dayView.setText("On Monday it will be a Day " + finalDay);
                                     } else {
                                         dayView.setVisibility(View.GONE);
