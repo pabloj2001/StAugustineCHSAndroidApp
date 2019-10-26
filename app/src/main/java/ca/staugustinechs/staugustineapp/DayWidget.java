@@ -1,8 +1,10 @@
 package ca.staugustinechs.staugustineapp;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
@@ -22,7 +24,7 @@ import java.util.TimeZone;
  * Implementation of App Widget functionality.
  */
 public class DayWidget extends AppWidgetProvider {
-    public static String day = "Day";
+    public static String day = "Click to update";
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -35,8 +37,20 @@ public class DayWidget extends AppWidgetProvider {
         DateFormat date = new SimpleDateFormat("EEEE, MMMM d, yyyy");
         final String today = date.format(cal.getTime());
 
+        updateDay(today);
+
         widgetViews.setTextViewText(R.id.date_widg, today);
-        widgetViews.setTextViewText(R.id.day_widg, updateDay(today));
+        widgetViews.setTextViewText(R.id.day_widg, day);
+
+        Intent update = new Intent(context, DayWidget.class);
+        update.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        int[] idArray = new int[]{appWidgetId};
+        update.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idArray);
+        PendingIntent pendingUpdate = PendingIntent.getBroadcast(context, appWidgetId, update,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        widgetViews.setOnClickPendingIntent(R.id.day_widg, pendingUpdate);
+        widgetViews.setOnClickPendingIntent(R.id.date_widg, pendingUpdate);
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, widgetViews);
     }
@@ -46,6 +60,8 @@ public class DayWidget extends AppWidgetProvider {
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
+            updateAppWidget(context, appWidgetManager, appWidgetId);
+
         }
     }
 
@@ -59,7 +75,7 @@ public class DayWidget extends AppWidgetProvider {
         // Enter relevant functionality for when the last widget is disabled
     }
 
-    public static String updateDay(final String today) {
+    private static void updateDay(final String today) {
         FirebaseFirestore.getInstance().collection("info")
                 .document("dayNumber").get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -67,10 +83,6 @@ public class DayWidget extends AppWidgetProvider {
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
                             DocumentSnapshot doc = task.getResult();
-
-                            if (doc.getBoolean("snowDay")) {
-                                day = "It's a snow day!";
-                            }
 
                             boolean haveFun = doc.getBoolean("haveFun");
                             String dayNum = doc.getString("dayNumber");
@@ -96,7 +108,6 @@ public class DayWidget extends AppWidgetProvider {
                         }
                     }
                 });
-        return day;
     }
 }
 
