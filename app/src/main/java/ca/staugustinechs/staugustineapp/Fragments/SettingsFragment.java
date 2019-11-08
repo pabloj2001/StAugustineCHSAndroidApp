@@ -171,6 +171,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         AlertDialog.Builder confirmDialog = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
         confirmDialog.setTitle("Change Theme");
         confirmDialog.setMessage("The app will close now to apply changes!");
+        confirmDialog.setCancelable(false);
         confirmDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -186,13 +187,13 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         confirmDialog.show();
     }
 
-    void cancelThemeChange() {
+    private void cancelThemeChange() {
         setsDarkMode.setOnCheckedChangeListener(null);
         setsDarkMode.setChecked(isDark);
         setsDarkMode.setOnCheckedChangeListener(this);
     }
 
-    void changeTheme(boolean dark) {
+    private void changeTheme(boolean dark) {
         if (dark) {
             isDark = true;
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
