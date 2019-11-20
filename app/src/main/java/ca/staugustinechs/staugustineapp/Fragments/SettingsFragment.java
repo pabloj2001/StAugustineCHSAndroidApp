@@ -1,6 +1,7 @@
 package ca.staugustinechs.staugustineapp.Fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
@@ -33,7 +35,7 @@ import ca.staugustinechs.staugustineapp.Activities.SignUp;
 import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.R;
 
-public class SettingsFragment extends Fragment implements View.OnClickListener {
+public class SettingsFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     Button setsSignOut, setsSignUp, setsFeedback;
     Switch setsClassesPrivate, setsClubsPrivate, setsNotifGeneral, setsDarkMode;
@@ -83,22 +85,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             setsDarkMode.setChecked(false);
         }
 
-        setsDarkMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, final boolean isChecked) {
-                if (isChecked) {
-                    isDark = true;
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                    Objects.requireNonNull(getActivity()).finish();
-                    //getDelegate().applyDayNight();
-                } else {
-                    isDark = false;
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    Objects.requireNonNull(getActivity()).finish();
-                    //getDelegate().applyDayNight();
-                }
-            }
-        });
+        setsDarkMode.setOnCheckedChangeListener(this);
 
         if (Main.PROFILE != null) {
             setsClassesPrivate.setChecked(!Main.PROFILE.showClasses());
@@ -177,5 +164,46 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
         onHiddenChanged(true);
         super.onDestroy();
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, final boolean isChecked) {
+        AlertDialog.Builder confirmDialog = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
+        confirmDialog.setTitle("Change Theme");
+        confirmDialog.setMessage("The app will close now to apply changes!");
+        confirmDialog.setCancelable(false);
+        confirmDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                changeTheme(isChecked);
+            }
+        });
+        confirmDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                cancelThemeChange();
+            }
+        });
+        confirmDialog.show();
+    }
+
+    private void cancelThemeChange() {
+        setsDarkMode.setOnCheckedChangeListener(null);
+        setsDarkMode.setChecked(isDark);
+        setsDarkMode.setOnCheckedChangeListener(this);
+    }
+
+    private void changeTheme(boolean dark) {
+        if (dark) {
+            isDark = true;
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            Objects.requireNonNull(getActivity()).finish();
+            //getDelegate().applyDayNight();
+        } else {
+            isDark = false;
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            Objects.requireNonNull(getActivity()).finish();
+            //getDelegate().applyDayNight();
+        }
     }
 }
