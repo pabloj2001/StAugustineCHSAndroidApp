@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 import ca.staugustinechs.staugustineapp.AppUtils;
+import ca.staugustinechs.staugustineapp.AsyncTasks.GetQuoteTask;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetUserTask;
 import ca.staugustinechs.staugustineapp.Fragments.CafMenuFragment;
 import ca.staugustinechs.staugustineapp.Fragments.ClubsFragment;
@@ -76,6 +77,8 @@ public class Main extends AppCompatActivity
 
     private final Map<String, Integer> fragments = new HashMap<String, Integer>();
     private HomeFragment homeFragment;
+
+    private GetQuoteTask qtask;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -132,6 +135,9 @@ public class Main extends AppCompatActivity
                     //GET USER DATA
                     refreshProfile();
 
+                    //UPDATE QUOTE
+                    updateQuote();
+
                     //TOOLBAR, DRAWER, AND NAVIGATION STUFF
                     drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                     ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -182,6 +188,7 @@ public class Main extends AppCompatActivity
                     } catch (PackageManager.NameNotFoundException e) {
                         e.printStackTrace();
                     }
+
                 } else {
                     //WE HAVE MANUALLY SHUT DOWN THE APP FROM RC, DON'T LET THE USER IN.
                     toolbar.setTitle("APP CURRENTLY OFFLINE");
@@ -215,6 +222,11 @@ public class Main extends AppCompatActivity
         userTask = new GetUserTask(this,
                 Arrays.asList(FirebaseAuth.getInstance().getUid()), true);
         userTask.execute();
+    }
+
+    public void updateQuote() {
+        GetQuoteTask qtask = new GetQuoteTask(this.homeFragment);
+        qtask.execute();
     }
 
     @Override

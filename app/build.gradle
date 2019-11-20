@@ -61,6 +61,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:20.0.0'
     implementation 'com.google.firebase:firebase-inappmessaging-display:19.0.1'
     implementation 'com.google.firebase:firebase-config:19.0.3'
+
+    implementation 'org.jsoup:jsoup:1.12.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

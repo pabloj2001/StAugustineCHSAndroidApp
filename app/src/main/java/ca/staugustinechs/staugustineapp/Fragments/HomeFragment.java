@@ -3,6 +3,7 @@ package ca.staugustinechs.staugustineapp.Fragments;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.view.LayoutInflater;
@@ -30,6 +31,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
@@ -39,10 +46,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
 
 import ca.staugustinechs.staugustineapp.Activities.Main;
 import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetClubAnnounsTask;
+import ca.staugustinechs.staugustineapp.AsyncTasks.GetQuoteTask;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetWebsiteTask;
 import ca.staugustinechs.staugustineapp.Interfaces.ClubAnnounGetter;
 import ca.staugustinechs.staugustineapp.Objects.ClubAnnouncement;
@@ -72,22 +81,25 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     private RecyclerView rv;
     private RViewAdapter_ClubAnnouns rvAdapter;
     private View clubGroup;
+    public TextView quote;
     private TextView announError;
     private boolean newsLoaded = false;
     private boolean requestedRefresh = false;
+    private View mainview;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        this.mainview = inflater.inflate(R.layout.fragment_home, container, false);
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
-
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             layout = (LinearLayout) view.findViewById(R.id.homeLayout);
             offline = getLayoutInflater().inflate(R.layout.offline_layout, null);
 
+            quote = (TextView) view.findViewById(R.id.daily_quote);
             dateGroupView = (View) view.findViewById(R.id.dateGroup);
             dateGroupView.setBackgroundColor(AppUtils.ACCENT_COLOR);
             progressBar = (ProgressBar) view.findViewById(R.id.homeLoadingCircle);
@@ -257,6 +269,17 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
 
             homeSwipeRefresh.setRefreshing(false);
             homeSwipeRefresh.setEnabled(true);
+        }
+    }
+
+    public void updateQuote(String quotestring) {
+        try {
+            System.out.println(getView());
+            this.quote = getView().findViewById(R.id.daily_quote);
+            this.quote.setText(quotestring);
+        }
+        catch (NullPointerException e) {
+            System.out.println("bruh moment");
         }
     }
 
