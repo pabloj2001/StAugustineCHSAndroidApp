@@ -278,8 +278,8 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
             this.quote = getView().findViewById(R.id.daily_quote);
             this.quote.setText(quotestring);
         }
-        catch (NullPointerException e) {
-            System.out.println("bruh moment");
+        catch (Exception e) {
+            Crashlytics.log("Failed to update quote");
         }
     }
 
