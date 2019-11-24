@@ -341,6 +341,8 @@ public class Main extends AppCompatActivity
                 toolbar.setTitle("FAQ");
                 changeFragment(new FaqFragment());
                 break;
+            case R.id.nav_prayer:
+                break;
         }
 
         drawer.closeDrawer(GravityCompat.START);
