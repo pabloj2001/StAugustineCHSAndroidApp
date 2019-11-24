@@ -141,6 +141,16 @@
                 android:layout_marginBottom="12dp"
                 android:id="@+id/calendar"/>
 
+            <TextView
+                android:id="@+id/daily_quote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="Loading quotes..."
+                android:textSize="12sp"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
+                android:layout_marginBottom="12dp" />
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
