@@ -7,7 +7,9 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -354,6 +356,13 @@ public class Main extends AppCompatActivity
                 changeFragment(new FaqFragment());
                 break;
             case R.id.nav_prayer:
+                Uri prayerForm = Uri.parse("https://forms.gle/hrNKVGsug1FpiXTg7");
+                Intent prayerIntent = new Intent(Intent.ACTION_VIEW, prayerForm);
+                if (prayerIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(prayerIntent);
+                } else {
+                    Log.d("IMPLICIT_PRAYER", "No intent receivers");
+                }
                 break;
         }
 
