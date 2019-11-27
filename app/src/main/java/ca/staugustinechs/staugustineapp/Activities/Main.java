@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetQuoteTask;
@@ -357,13 +358,30 @@ public class Main extends AppCompatActivity
                 break;
             case R.id.nav_prayer:
                 //launch form in browser
-                Uri prayerForm = Uri.parse("https://forms.gle/hrNKVGsug1FpiXTg7");
-                Intent prayerIntent = new Intent(Intent.ACTION_VIEW, prayerForm);
-                if (prayerIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(prayerIntent);
-                } else {
-                    Log.d("IMPLICIT_PRAYER", "No intent receivers");
-                }
+                AlertDialog.Builder redirectDialog = new AlertDialog.Builder(Objects.requireNonNull(this));
+                redirectDialog.setTitle("Redirect Warning");
+                redirectDialog.setMessage("You will be redirected to a Google form!");
+                redirectDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Uri prayerForm = Uri.parse("https://forms.gle/hrNKVGsug1FpiXTg7");
+                        Intent prayerIntent = new Intent(Intent.ACTION_VIEW, prayerForm);
+                        if (prayerIntent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(prayerIntent);
+                        } else {
+                            Log.d("IMPLICIT_PRAYER", "No intent receivers");
+                        }
+                    }
+                });
+
+                redirectDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        //do nothing
+                    }
+                });
+
+                redirectDialog.show();
                 break;
         }
 
