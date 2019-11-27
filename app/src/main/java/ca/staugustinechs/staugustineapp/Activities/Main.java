@@ -356,6 +356,7 @@ public class Main extends AppCompatActivity
                 changeFragment(new FaqFragment());
                 break;
             case R.id.nav_prayer:
+                //launch form in browser
                 Uri prayerForm = Uri.parse("https://forms.gle/hrNKVGsug1FpiXTg7");
                 Intent prayerIntent = new Intent(Intent.ACTION_VIEW, prayerForm);
                 if (prayerIntent.resolveActivity(getPackageManager()) != null) {
