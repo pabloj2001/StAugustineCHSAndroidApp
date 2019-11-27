@@ -251,6 +251,7 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
             progressBar.setVisibility(View.GONE);
             dateGroupView.setVisibility(View.VISIBLE);
             calendar.setVisibility(View.VISIBLE);
+            quote.setVisibility(View.VISIBLE);
             if (announcements.getAdapter() != null) {
                 announcements.setVisibility(View.VISIBLE);
                 announError.setVisibility(View.GONE);

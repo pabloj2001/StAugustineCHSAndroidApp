@@ -13,6 +13,8 @@ import ca.staugustinechs.staugustineapp.Fragments.HomeFragment;
 
 public class GetQuoteTask extends AsyncTask<String, Void, String> {
 
+    private String quoteverse;
+    private String quotescripture;
     private String quotedata;
     private HomeFragment homeFragment;
 
@@ -29,7 +31,10 @@ public class GetQuoteTask extends AsyncTask<String, Void, String> {
             Elements texts = doc.select("div.votd-verse-component");
 
             for (Element text: texts) {
-                quotedata = text.select("div.votd-box p").text();
+                quoteverse = text.select("div.votd-box p").text();
+                quotescripture = text.select("div.votd-box a[class]").text();
+                quotedata = quoteverse + "\n" + quotescripture;
+
             }
 
         } catch (IOException e) { // catch IOException
