@@ -38,4 +38,34 @@
         <item>Club announcements</item>
         <item>Yes, however, the notifications will only appear on the last signed in device</item>
     </string-array>
+
+    <string-array name="spirit_level_titles">
+        <item>Level 1 (0–25) \nThe student demonstrates an interest in the school spirit</item>
+        <item>Level 2 (26–50) \nThe student demonstrates a considerate amount of school spirit</item>
+        <item>Level 3 (51–75) \nThe student demonstrates great school spirit</item>
+        <item>Level 4 (76–100) \nThe student demonstrates a remarkable and outstanding display of school spirit</item>
+    </string-array>
+
+    <string-array name="spirit_level_desc">
+        <item>- Joining the app -> 10
+            \n- Interacting with Student Council social media platforms i.e. participating in a digital poll. -> 10
+            \n- Taking a picture with Santa -> 20\n- Mass involvement(passage reader, altar servers, choir/band member) -> 25</item>
+        <item>- Participating in candy gram -> 30
+            \n- Coming to school dressed in a costume -> 30
+            \n- Class donations - the top 3 classes who donate the most food. First gets 50 points, second gets 40 points, third gets 30 points
+            \n- Terry Fox - top 3 individual donations(on top of the 10 points for the minimum donation and walk). First gets 50 points, second gets 40 points, third gets 30 points and the minimum $10 donation gets 10 points.
+            \n- Holding an executive position on a committee/council or being captain of a team, or leader of a club, managing a team(on top of points given for being a part of a school initiative) -> 50</item>
+        <item>- Joining a club -> 55
+            \n- Joining a team -> 55
+            \n- Following our Snapchat and/or Instagram page -> 55
+            \n- Wears Titan gear on Titan Tuesdays -> 60
+            \n- Joining a committee -> 65
+            \n- Joining a council -> 75
+            \n- School spirit homeroom participating(buyout, door decorating, pumpkin decorating) -> 75
+            \n- Homeroom competition winners(Additional points on top of involvement): first gets 75 points, second gets 65 points, third gets 55 points</item>
+        <item>- Nominated by teacher/coach for outstanding display of school spirit or random act of kindness -> 100(requires personal, written explanation)
+            \n- Titan of the month award -> 100
+            \n- Attending any Titans event as an individual not with your homeroom(sports, art, drama, semi, carnival, escape room, coffee house, banquets, movie night etc but excludes kahoots) -> 80
+            \n- Active participant in any Titan event i.e. performing in coffeehouse, participating in a buy-out, Titan Tuesday competition, costume contest, winning a kahoot, etc.(excluding sports teams, art, drama)*on top of the 80 points given for attending the Titans event* -> 80</item>
+    </string-array>
 </resources>

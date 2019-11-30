@@ -5,19 +5,23 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetSpiritPointsTask;
 import ca.staugustinechs.staugustineapp.R;
 
-public class SpiritMetersFragment extends Fragment {
-
+public class SpiritMetersFragment extends Fragment implements View.OnClickListener {
+    private CardView[] levelCards = new CardView[4];
+    private boolean[] expanded = new boolean[4];
     private TextView grade9text, grade10text, grade11text, grade12text;
     private ProgressBar grade9bar, grade10bar, grade11bar, grade12bar;
     private GetSpiritPointsTask task;
@@ -47,9 +51,11 @@ public class SpiritMetersFragment extends Fragment {
 
             task = new GetSpiritPointsTask(this);
             task.execute();
-        }else{
+        } else {
             setOffline();
         }
+
+        initializeCards(view);
     }
 
     public void updatePoints(int[] points) {
@@ -91,6 +97,50 @@ public class SpiritMetersFragment extends Fragment {
 
     public void setOffline(){
 
+    }
+
+    private void initializeCards(View view) {
+        String[] spiritLevelTitles = getResources().getStringArray(R.array.spirit_level_titles);
+        String[] spiritLevelDesc = getResources().getStringArray(R.array.spirit_level_desc);
+        levelCards[0] = view.findViewById(R.id.level_1);
+        levelCards[1] = view.findViewById(R.id.level_2);
+        levelCards[2] = view.findViewById(R.id.level_3);
+        levelCards[3] = view.findViewById(R.id.level_4);
+
+        for (int i = 0; i < levelCards.length; i++) {
+            expanded[i] = false;
+            TextView titleTv = levelCards[i].findViewById(R.id.question);
+            TextView bodyTv = levelCards[i].findViewById(R.id.answer);
+            ImageView expandCollapse = levelCards[i].findViewById(R.id.expand_collapse);
+            titleTv.setText(spiritLevelTitles[i]);
+            bodyTv.setText(spiritLevelDesc[i]);
+            expandCollapse.setBackgroundResource(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO
+                    ? R.drawable.ic_expand_24dp : R.drawable.ic_expand_dark_24dp);
+            levelCards[i].setOnClickListener(this);
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        int index = 0;
+        for (int i = 0; i < levelCards.length; i++) {
+            if (view.equals(levelCards[i])) {
+                index = i;
+            }
+        }
+
+        expanded[index] = !expanded[index];
+        TextView bodyTv = levelCards[index].findViewById(R.id.answer);
+        ImageView expandCollapse = levelCards[index].findViewById(R.id.expand_collapse);
+        bodyTv.setVisibility(expanded[index] ? View.VISIBLE : View.GONE);
+
+        if (expanded[index]) {
+            expandCollapse.setBackgroundResource(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO
+                    ? R.drawable.ic_collapse_24dp : R.drawable.ic_collapse_dark_24dp);
+        } else {
+            expandCollapse.setBackgroundResource(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO
+                    ? R.drawable.ic_expand_24dp : R.drawable.ic_expand_dark_24dp);
+        }
     }
 
     @Override
