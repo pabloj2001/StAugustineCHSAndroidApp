@@ -50,6 +50,12 @@ public class FaqFragment extends Fragment {
         String[] questionList = getResources().getStringArray(R.array.faq_questions);
         String[] answerList = getResources().getStringArray(R.array.faq_answers);
         questionAnswers.clear();
+
+        if (questionList.length != answerList.length) {
+            //this should not happen, there should be the same number of questions and answers
+            return;
+        }
+
         for (int i = 0; i < questionList.length; i++) {
             questionAnswers.add(new QuestionAnswer(questionList[i], answerList[i]));
         }

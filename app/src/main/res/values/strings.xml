@@ -23,6 +23,7 @@
         <item>Is there a place in the app or somewhere we can put suggestions and report bugs?</item>
         <item>What is the difference between club announcements and school wide announcements?</item>
         <item>Can I log into my account on multiple devices?</item>
+        <item>Does the app have a really cool website to go with it?</item>
     </string-array>
 
     <!--Add faq screen answers here-->
@@ -37,6 +38,7 @@
         <item>Yes! You can find it in the app settings.</item>
         <item>Club announcements</item>
         <item>Yes, however, the notifications will only appear on the last signed in device</item>
+        <item>Yes! Of course we do: https://app.staugustinechs.ca/</item>
     </string-array>
 
     <string-array name="spirit_level_titles">
