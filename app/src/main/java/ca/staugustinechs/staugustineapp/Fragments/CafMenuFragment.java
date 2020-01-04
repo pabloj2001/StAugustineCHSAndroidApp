@@ -86,6 +86,7 @@ public class CafMenuFragment extends Fragment {
         if(items != null && AppUtils.isNetworkAvailable(this.getActivity())){
             RViewAdapter_CafMenu adapter = new RViewAdapter_CafMenu(items);
             if(dailyMenu){
+
                 if(items.size() > 0){
                     menu.setAdapter(adapter);
                 }else{

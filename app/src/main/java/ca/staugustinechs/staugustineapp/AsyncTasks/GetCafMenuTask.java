@@ -56,7 +56,7 @@ public class GetCafMenuTask extends AsyncTask<String, Void, List<CafMenuItem>> {
                         ((String) cafImages.get(itemName)) : "https://i.kym-cdn.com/photos/images/original/001/067/012/a30.jpg_large";
                 Bitmap img = null;
                 try {
-                    img = Picasso.get().load(imgUrl).resize(400, 300).centerCrop().get();
+                    img = Picasso.get().load(imgUrl).resize(300, 400).rotate(90).centerCrop().get();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -73,7 +73,7 @@ public class GetCafMenuTask extends AsyncTask<String, Void, List<CafMenuItem>> {
 
     @Override
     protected void onPostExecute(List<CafMenuItem> items) {
-        if(!this.isCancelled()){
+        if (!this.isCancelled()) {
             //RETURN ITEMS TO CAF MENU FRAGMENT
             cafMenuFragment.updateMenu(items, dailyMenu);
         }
