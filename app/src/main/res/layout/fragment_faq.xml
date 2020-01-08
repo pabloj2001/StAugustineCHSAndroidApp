@@ -3,23 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/faq_layout"
     tools:context=".Fragments.FaqFragment">
-    <!--<android.support.v7.widget.RecyclerView
-        android:layout_marginEnd="5dp"
-        android:layout_marginStart="5dp"
-        android:id="@+id/faq_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />-->
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/faq_scroll"
         android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
+            <ProgressBar
+                android:id="@+id/faqLoadingCircle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="@dimen/loadingCirclePadding" />
 
             <include
                 layout="@layout/recyclerview"
