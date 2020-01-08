@@ -62,7 +62,6 @@ public class FaqFragment extends Fragment {
             questionAnswers = new ArrayList<>();
             adapter = new RViewAdapter_Faq(getContext(), questionAnswers);
             recycler.setAdapter(adapter);
-            //GET ALL SONGS FROM DB
             faqTask = new GetFaqTask();
             faqTask.execute();
         } else {
