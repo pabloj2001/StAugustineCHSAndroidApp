@@ -279,6 +279,9 @@ public class Main extends AppCompatActivity
         TextView email = (TextView) findViewById(R.id.nav_grade);
         email.setText(Main.PROFILE.getEmail().substring(0, Main.PROFILE.getEmail().indexOf("@")));
 
+        TextView points = (TextView) findViewById(R.id.nav_points);
+        points.setText(getString(R.string.points).concat(String.valueOf(Main.PROFILE.getPoints())));
+
         //ALLOW THE TOP SECTION OF THE DRAWER TO BE CLICKABLE
         View navGroup = findViewById(R.id.navGroup);
         navGroup.setOnClickListener(this);

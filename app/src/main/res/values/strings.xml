@@ -5,6 +5,7 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
+    <string name="points">Points:&#160;</string>
     <string name="newsSiteUrl">https://www.staugustinechs.ca/printable</string>
     <string name="signInMessage">SIGN IN WITH YOUR\nYCDSB ACCOUNT TO CONTINUE</string>
     <string name="scriptId">M4mEiRp5y5-lCa01NFoeSIAExKb2sehiP</string>
