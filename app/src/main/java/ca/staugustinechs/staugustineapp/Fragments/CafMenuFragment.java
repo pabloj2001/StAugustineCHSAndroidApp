@@ -60,7 +60,7 @@ public class CafMenuFragment extends Fragment {
         }else{
             cmDailyHeader.setText(today + " Menu");
             menu = view.findViewById(R.id.cmMenu);
-            menu.setLayoutManager(new LinearLayoutManager(this.getContext()){
+            menu.setLayoutManager(new LinearLayoutManager(this.getContext()) {
                 @Override
                 public boolean canScrollVertically(){
                     return false;
@@ -71,7 +71,7 @@ public class CafMenuFragment extends Fragment {
             task.execute();
         }
 
-        menuRegular.setLayoutManager(new LinearLayoutManager(this.getContext()){
+        menuRegular.setLayoutManager(new LinearLayoutManager(this.getContext()) {
             @Override
             public boolean canScrollVertically(){
                 return false;
@@ -86,6 +86,7 @@ public class CafMenuFragment extends Fragment {
         if(items != null && AppUtils.isNetworkAvailable(this.getActivity())){
             RViewAdapter_CafMenu adapter = new RViewAdapter_CafMenu(items);
             if(dailyMenu){
+
                 if(items.size() > 0){
                     menu.setAdapter(adapter);
                 }else{

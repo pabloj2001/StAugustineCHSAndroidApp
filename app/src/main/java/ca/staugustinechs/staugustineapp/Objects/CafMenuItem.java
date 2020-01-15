@@ -3,9 +3,10 @@ package ca.staugustinechs.staugustineapp.Objects;
 public class CafMenuItem {
 
     private String name;
+    //private Bitmap image;
     private double price;
 
-    public CafMenuItem(String name, double price){
+    public CafMenuItem(String name, double price) {
         this.name = name;
         this.price = price;
     }
@@ -17,4 +18,8 @@ public class CafMenuItem {
     public double getPrice() {
         return price;
     }
+
+    //public Bitmap getImage() {
+    //  return image;
+    //}
 }

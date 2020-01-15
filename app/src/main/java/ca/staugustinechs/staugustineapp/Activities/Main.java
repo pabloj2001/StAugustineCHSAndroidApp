@@ -7,7 +7,9 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,8 +42,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import ca.staugustinechs.staugustineapp.AppUtils;
+import ca.staugustinechs.staugustineapp.AsyncTasks.GetQuoteTask;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetUserTask;
 import ca.staugustinechs.staugustineapp.Fragments.CafMenuFragment;
 import ca.staugustinechs.staugustineapp.Fragments.ClubsFragment;
@@ -76,6 +80,8 @@ public class Main extends AppCompatActivity
 
     private final Map<String, Integer> fragments = new HashMap<String, Integer>();
     private HomeFragment homeFragment;
+
+    private GetQuoteTask qtask;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -132,6 +138,9 @@ public class Main extends AppCompatActivity
                     //GET USER DATA
                     refreshProfile();
 
+                    //UPDATE QUOTE
+                    updateQuote();
+
                     //TOOLBAR, DRAWER, AND NAVIGATION STUFF
                     drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                     ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -182,6 +191,7 @@ public class Main extends AppCompatActivity
                     } catch (PackageManager.NameNotFoundException e) {
                         e.printStackTrace();
                     }
+
                 } else {
                     //WE HAVE MANUALLY SHUT DOWN THE APP FROM RC, DON'T LET THE USER IN.
                     toolbar.setTitle("APP CURRENTLY OFFLINE");
@@ -215,6 +225,11 @@ public class Main extends AppCompatActivity
         userTask = new GetUserTask(this,
                 Arrays.asList(FirebaseAuth.getInstance().getUid()), true);
         userTask.execute();
+    }
+
+    public void updateQuote() {
+        GetQuoteTask qtask = new GetQuoteTask(this.homeFragment);
+        qtask.execute();
     }
 
     @Override
@@ -263,6 +278,9 @@ public class Main extends AppCompatActivity
         //SET THE USER'S EMAIL IN THE DRAWER
         TextView email = (TextView) findViewById(R.id.nav_grade);
         email.setText(Main.PROFILE.getEmail().substring(0, Main.PROFILE.getEmail().indexOf("@")));
+
+        TextView points = (TextView) findViewById(R.id.nav_points);
+        points.setText(getString(R.string.points).concat(String.valueOf(Main.PROFILE.getPoints())));
 
         //ALLOW THE TOP SECTION OF THE DRAWER TO BE CLICKABLE
         View navGroup = findViewById(R.id.navGroup);
@@ -340,6 +358,33 @@ public class Main extends AppCompatActivity
                 //SWITCH TO FAQ
                 toolbar.setTitle("FAQ");
                 changeFragment(new FaqFragment());
+                break;
+            case R.id.nav_prayer:
+                //launch form in browser
+                AlertDialog.Builder redirectDialog = new AlertDialog.Builder(Objects.requireNonNull(this));
+                redirectDialog.setTitle("Redirect Warning");
+                redirectDialog.setMessage("You will be redirected to a Google form!");
+                redirectDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Uri prayerForm = Uri.parse("https://forms.gle/hrNKVGsug1FpiXTg7");
+                        Intent prayerIntent = new Intent(Intent.ACTION_VIEW, prayerForm);
+                        if (prayerIntent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(prayerIntent);
+                        } else {
+                            Log.d("IMPLICIT_PRAYER", "No intent receivers");
+                        }
+                    }
+                });
+
+                redirectDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        //do nothing
+                    }
+                });
+
+                redirectDialog.show();
                 break;
         }
 

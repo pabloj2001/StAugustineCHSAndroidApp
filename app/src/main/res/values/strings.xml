@@ -5,39 +5,40 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
+    <string name="points">Points:&#160;</string>
     <string name="newsSiteUrl">https://www.staugustinechs.ca/printable</string>
     <string name="signInMessage">SIGN IN WITH YOUR\nYCDSB ACCOUNT TO CONTINUE</string>
     <string name="scriptId">M4mEiRp5y5-lCa01NFoeSIAExKb2sehiP</string>
     <string name="web_client_id">448336593725-o8h11bnj9kh32lc8kk6pvgdeknfj3it2.apps.googleusercontent.com</string>
     <string name="default_notification_channel_id">DEFAULT_NOTIFICATION_IDBLEH</string>
 
-    <!--Add faq screen questions here-->
-    <string-array name="faq_questions">
-        <item>If I spend my spirit points, does it take away from the spirit points of my grade?</item>
-        <item>How do I keep my school information private?</item>
-        <item>How do you get more badges? Will each club have one?</item>
-        <item>What does “Clear Cache” do?</item>
-        <item>Does the app update for snow days on the home page?</item>
-        <item>How do you earn points to spend on profile pics?</item>
-        <item>Will the caf menu be updated the night before or the morning of?</item>
-        <item>Is there a place in the app or somewhere we can put suggestions and report bugs?</item>
-        <item>What is the difference between club announcements and school wide announcements?</item>
-        <item>Can I log into my account on multiple devices?</item>
+    <string-array name="spirit_level_titles">
+        <item>Level 1 (0–25) \nThe student demonstrates an interest in the school spirit</item>
+        <item>Level 2 (26–50) \nThe student demonstrates a considerate amount of school spirit</item>
+        <item>Level 3 (51–75) \nThe student demonstrates great school spirit</item>
+        <item>Level 4 (76–100) \nThe student demonstrates a remarkable and outstanding display of school spirit</item>
     </string-array>
 
-    <!--Add faq screen answers here-->
-    <string-array name="faq_answers">
-        <item>No. Although the spirit points you gain individually are added to your grades overall spirit meter, these points will not be taken away once you decide to spend them. </item>
-        <item>To ensure other students cannot see your courses or clubs, go to the home screen and click the three dots on the top left corner, and then go into settings. From there, turn on the toggle switch to keep classes and clubs private</item>
-        <item>You can get more badges by joining different clubs, however, badges can only be earned once you have been accepted into the club by your club administrator. No, not all clubs have badges. It is up to the club administrator if they wish to add them.</item>
-        <item>We store images on the app so that it runs smooth. By clearing cache, you will save storage on your device. The app will still be able to run, however, loading time may take a bit longer. </item>
-        <item>Yes. The app gets its information directly from School Bus City, therefore once updates have been posted on the website, the app will update as well by posting it on the home page as well as sending out a notification (if notifications are on). </item>
-        <item>You can earn points by joining clubs which require approval from the administrator. From there you are free to use your points on whatever you wish (ie. song requests, new profile pictures, etc.)</item>
-        <item>The caf menu will be updated on the app the morning of, as this is when the cafeteria posts that day’s menu.</item>
-        <item>Yes! You can find it in the app settings.</item>
-        <item>Club announcements</item>
-        <item>Yes, however, the notifications will only appear on the last signed in device</item>
+    <string-array name="spirit_level_desc">
+        <item>- Joining the app -> 10
+            \n- Interacting with Student Council social media platforms i.e. participating in a digital poll. -> 10
+            \n- Taking a picture with Santa -> 20\n- Mass involvement(passage reader, altar servers, choir/band member) -> 25</item>
+        <item>- Participating in candy gram -> 30
+            \n- Coming to school dressed in a costume -> 30
+            \n- Class donations - the top 3 classes who donate the most food. First gets 50 points, second gets 40 points, third gets 30 points
+            \n- Terry Fox - top 3 individual donations(on top of the 10 points for the minimum donation and walk). First gets 50 points, second gets 40 points, third gets 30 points and the minimum $10 donation gets 10 points.
+            \n- Holding an executive position on a committee/council or being captain of a team, or leader of a club, managing a team(on top of points given for being a part of a school initiative) -> 50</item>
+        <item>- Joining a club -> 55
+            \n- Joining a team -> 55
+            \n- Following our Snapchat and/or Instagram page -> 55
+            \n- Wears Titan gear on Titan Tuesdays -> 60
+            \n- Joining a committee -> 65
+            \n- Joining a council -> 75
+            \n- School spirit homeroom participating(buyout, door decorating, pumpkin decorating) -> 75
+            \n- Homeroom competition winners(Additional points on top of involvement): first gets 75 points, second gets 65 points, third gets 55 points</item>
+        <item>- Nominated by teacher/coach for outstanding display of school spirit or random act of kindness -> 100(requires personal, written explanation)
+            \n- Titan of the month award -> 100
+            \n- Attending any Titans event as an individual not with your homeroom(sports, art, drama, semi, carnival, escape room, coffee house, banquets, movie night etc but excludes kahoots) -> 80
+            \n- Active participant in any Titan event i.e. performing in coffeehouse, participating in a buy-out, Titan Tuesday competition, costume contest, winning a kahoot, etc.(excluding sports teams, art, drama)*on top of the 80 points given for attending the Titans event* -> 80</item>
     </string-array>
-
-
 </resources>

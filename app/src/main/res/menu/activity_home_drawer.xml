@@ -24,6 +24,12 @@
             android:id="@+id/nav_songs"
             android:icon="@drawable/ic_round_queue_music_24px"
             android:title="Song Requests" />
+
+        <item
+            android:id="@+id/nav_prayer"
+            android:icon="@drawable/ic_prayer"
+            android:title="Prayer Requests" />
+
         <item
             android:id="@+id/nav_meter"
             android:icon="@drawable/ic_round_trending_up_24px"

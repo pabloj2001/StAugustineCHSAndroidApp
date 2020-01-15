@@ -3,6 +3,7 @@ package ca.staugustinechs.staugustineapp.Fragments;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.view.LayoutInflater;
@@ -30,6 +31,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
@@ -39,10 +46,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
 
 import ca.staugustinechs.staugustineapp.Activities.Main;
 import ca.staugustinechs.staugustineapp.AppUtils;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetClubAnnounsTask;
+import ca.staugustinechs.staugustineapp.AsyncTasks.GetQuoteTask;
 import ca.staugustinechs.staugustineapp.AsyncTasks.GetWebsiteTask;
 import ca.staugustinechs.staugustineapp.Interfaces.ClubAnnounGetter;
 import ca.staugustinechs.staugustineapp.Objects.ClubAnnouncement;
@@ -53,7 +62,6 @@ import ca.staugustinechs.staugustineapp.RVAdapters.RViewAdapter_ClubAnnouns;
 import ca.staugustinechs.staugustineapp.RVAdapters.RViewAdapter_Home;
 
 public class HomeFragment extends Fragment implements ClubAnnounGetter {
-
     private String CALENDAR_URL = "https://calendar.google.com/calendar/r?" +
             "cid=ycdsbk12.ca_f456pem6p0idarcilfuqiakaa8@group.calendar.google.com" +
             "&cid=ycdsbk12.ca_4tepqngmnt9htbg435bmbpf3tg%40group.calendar.google.com";
@@ -73,22 +81,25 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     private RecyclerView rv;
     private RViewAdapter_ClubAnnouns rvAdapter;
     private View clubGroup;
+    public TextView quote;
     private TextView announError;
     private boolean newsLoaded = false;
     private boolean requestedRefresh = false;
+    private View mainview;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        this.mainview = inflater.inflate(R.layout.fragment_home, container, false);
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
-
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        if(savedInstanceState == null){
+        if (savedInstanceState == null) {
             layout = (LinearLayout) view.findViewById(R.id.homeLayout);
             offline = getLayoutInflater().inflate(R.layout.offline_layout, null);
 
+            quote = (TextView) view.findViewById(R.id.daily_quote);
             dateGroupView = (View) view.findViewById(R.id.dateGroup);
             dateGroupView.setBackgroundColor(AppUtils.ACCENT_COLOR);
             progressBar = (ProgressBar) view.findViewById(R.id.homeLoadingCircle);
@@ -113,7 +124,7 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
 
             announcements = (RecyclerView) view.findViewById(R.id.homeAnnouncements);
             announcements.setHasFixedSize(true);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext()){
+            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext()) {
                 @Override
                 public boolean canScrollVertically() {
                     return false;
@@ -127,13 +138,13 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
                 @Override
                 public void onClick(View v) {
                     boolean calendarAdded = AppUtils.loadCalendarAdded(getActivity());
-                    if(calendarAdded){
+                    if (calendarAdded) {
                         Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
                         builder.appendPath("time");
                         ContentUris.appendId(builder, Calendar.getInstance().getTimeInMillis());
                         Intent intent = new Intent(Intent.ACTION_VIEW).setData(builder.build());
                         startActivity(intent);
-                    }else{
+                    } else {
                         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
                         builder.setToolbarColor(AppUtils.PRIMARY_COLOR);
                         CustomTabsIntent customTabsIntent = builder.build();
@@ -151,7 +162,7 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
             rv.setHasFixedSize(true);
 
             // use a linear layout manager
-            LinearLayoutManager layoutManager2 = new LinearLayoutManager(this.getContext()){
+            LinearLayoutManager layoutManager2 = new LinearLayoutManager(this.getContext()) {
                 @Override
                 public boolean canScrollVertically() {
                     return false;
@@ -161,8 +172,8 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
         }
     }
 
-    public void updateAnnouncements(String source){
-        if(!this.isHidden() && getView() != null){
+    public void updateAnnouncements(String source) {
+        if (!this.isHidden() && getView() != null) {
             source = source != null && source.contains("<title>St Augustine CHS") ? source : null;
 
             List<NewsItem> newsItems = getNewsItems(source);
@@ -194,23 +205,23 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     @Override
     public void updateAnnouns(List<ClubAnnouncement> rawClubAnnouns) {
         System.out.println("UPDATING CLUB ANNOUNS");
-        if(rawClubAnnouns != null){
+        if (rawClubAnnouns != null) {
             List<ClubAnnouncement> clubAnnouns = new ArrayList<ClubAnnouncement>();
 
             long DAY_IN_MS = 1000 * 60 * 60 * 24;
             Date lastWeek = new Date(System.currentTimeMillis() - (7 * DAY_IN_MS));
-            for(ClubAnnouncement announ : rawClubAnnouns){
-                if(announ.getDate().after(lastWeek)){
+            for (ClubAnnouncement announ : rawClubAnnouns) {
+                if (announ.getDate().after(lastWeek)) {
                     clubAnnouns.add(announ);
                 }
             }
 
             System.out.println("UPDATING CLUB ANNOUNS");
-            if(rvAdapter == null){
+            if (rvAdapter == null) {
                 rvAdapter = new RViewAdapter_ClubAnnouns(clubAnnouns, null);
                 rv.setAdapter(rvAdapter);
                 showViews();
-            }else if(!rawClubAnnouns.isEmpty()){
+            } else if (!rawClubAnnouns.isEmpty()) {
                 rvAdapter.addItems(clubAnnouns);
                 // clubGroup.setVisibility(View.VISIBLE);
                 //homeClubLoading.setVisibility(View.VISIBLE);
@@ -219,36 +230,37 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
 
         //CHECK IF ALL TASKS ARE FINISHED
         boolean allFinished = true;
-        for(GetClubAnnounsTask task : clubAnnounTasks){
-            if(!task.isFinished()){
+        for (GetClubAnnounsTask task : clubAnnounTasks) {
+            if (!task.isFinished()) {
                 allFinished = false;
             }
         }
 
-        if(allFinished){
+        if (allFinished) {
             homeClubLoading.setVisibility(View.GONE);
             //SCROLL UP
             onHiddenChanged(false);
         }
     }
 
-    private void showViews(){
+    private void showViews() {
         System.out.println("SHOW VIEWS: " + newsLoaded + ", " + rvAdapter);
-        if(newsLoaded && ((Main.PROFILE.getClubs() == null || Main.PROFILE.getClubs().isEmpty())
-                || rvAdapter != null)){
+        if (newsLoaded && ((Main.PROFILE.getClubs() == null || Main.PROFILE.getClubs().isEmpty())
+                || rvAdapter != null)) {
             System.out.println("ALL LOADED");
             progressBar.setVisibility(View.GONE);
             dateGroupView.setVisibility(View.VISIBLE);
             calendar.setVisibility(View.VISIBLE);
-            if(announcements.getAdapter() != null) {
+            quote.setVisibility(View.VISIBLE);
+            if (announcements.getAdapter() != null) {
                 announcements.setVisibility(View.VISIBLE);
                 announError.setVisibility(View.GONE);
-            }else{
+            } else {
                 announcements.setVisibility(View.GONE);
                 announError.setVisibility(View.VISIBLE);
             }
 
-            if(Main.PROFILE.getClubs() != null && (rvAdapter != null && rvAdapter.getItemCount() > 0)){
+            if (Main.PROFILE.getClubs() != null && (rvAdapter != null && rvAdapter.getItemCount() > 0)) {
                 clubGroup.setVisibility(View.VISIBLE);
                 homeClubLoading.setVisibility(View.VISIBLE);
             }
@@ -261,34 +273,45 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
         }
     }
 
+    public void updateQuote(String quotestring) {
+        try {
+            System.out.println(getView());
+            this.quote = getView().findViewById(R.id.daily_quote);
+            this.quote.setText(quotestring);
+        }
+        catch (Exception e) {
+            Crashlytics.log("Failed to update quote");
+        }
+    }
+
     private List<NewsItem> getNewsItems(String content) {
         layout.removeView(offline);
-        if(content != null){
+        if (content != null) {
             String[][] newsItems = this.processNewsSite(content);
 
             List<NewsItem> news = new ArrayList<NewsItem>();
-            for(int i = 0; i < newsItems.length; i++){
+            for (int i = 0; i < newsItems.length; i++) {
                 news.add(new NewsItem(newsItems[i][0], newsItems[i][1]));
             }
 
             return news;
-        }else{
-            if(AppUtils.isNetworkAvailable(this.getActivity())){
+        } else {
+            if (AppUtils.isNetworkAvailable(this.getActivity())) {
                 Crashlytics.log("Couldn't retrieve website!");
             }
             return new ArrayList<NewsItem>();
         }
     }
 
-    private void getTopSong(){
+    private void getTopSong() {
         FirebaseFirestore.getInstance().collection("songs")
                 .orderBy("upvotes", Query.Direction.DESCENDING).limit(1).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             List<DocumentSnapshot> query = task.getResult().getDocuments();
-                            if(query.size() > 0){
+                            if (query.size() > 0) {
                                 DocumentSnapshot doc = query.get(0);
                                 SongItem song = new SongItem(doc.getId(), doc.getData());
                                 //SHOW SONG IN TEXTVIEW
@@ -298,7 +321,7 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
                 });
     }
 
-    private String[][] processNewsSite(String content){
+    private String[][] processNewsSite(String content) {
         //THE STRING content IS THE WEBSITE CODE WE DOWNLOADED
         //GET STRING BETWEEN 'ancmnt = "' and '".split(",");' AND SPLIT THE DIFFERENT NEWS ITEMS (SEPARATED BY COMMAS)
         String[] news = content.substring(content.indexOf("ancmnt = \"") + "ancmnt = \"".length(),
@@ -306,13 +329,13 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
         //CREATE ARRAY WHERE THE NEWS WILL GO: FIRST ROW IS TITLE AND SECOND IS DESCRIPTION
         String[][] finalNews = new String[news.length][2];
 
-        for(int i = 0; i < news.length; i++){
+        for (int i = 0; i < news.length; i++) {
             //SPLIT THE TITLE AND DESCRIPTION OF EACH NEWS (SEPARATED BY '%24%25-%25%24')
             String[] item = news[i].split("%24%25-%25%24");
             try {
                 //DECODE THE TITLE AND PUT IT INTO FIRST ROW OF CORRESPOINDING INDEX IN THE FINAL ARRAY
                 finalNews[i][0] = URLDecoder.decode(item[0], "UTF-8");
-                if(item.length > 1){
+                if (item.length > 1) {
                     //IF DESCRIPTION EXISTS, DECODE THAT AND PUT IT INTO THE SECOND ROW
                     finalNews[i][1] = URLDecoder.decode(item[1], "UTF-8");
                 }
@@ -325,7 +348,7 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
         return finalNews;
     }
 
-    private void updateDay(final String today){
+    private void updateDay(final String today) {
         FirebaseFirestore.getInstance().collection("info")
                 .document("dayNumber").get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -338,7 +361,7 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
                             TextView snowDay = getView().findViewById(R.id.snowDay);
                             if (doc.getBoolean("snowDay")) {
                                 snowDay.setVisibility(View.VISIBLE);
-                            }else{
+                            } else {
                                 snowDay.setVisibility(View.GONE);
                             }
 
@@ -396,13 +419,13 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
         layout.addView(offline);
     }
 
-    public void refreshAnnouns(){
-        if(!homeSwipeRefresh.isRefreshing() || requestedRefresh){
+    public void refreshAnnouns() {
+        if (!homeSwipeRefresh.isRefreshing() || requestedRefresh) {
             requestedRefresh = false;
-            if(AppUtils.isNetworkAvailable(this.getActivity()) && Main.PROFILE != null){
-                if(!this.isHidden()){
+            if (AppUtils.isNetworkAvailable(this.getActivity()) && Main.PROFILE != null) {
+                if (!this.isHidden()) {
                     System.out.println("REFRESHING");
-                    if(progressBar.getVisibility() == View.GONE){
+                    if (progressBar.getVisibility() == View.GONE) {
                         main.refreshProfile();
                     }
 
@@ -415,8 +438,8 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
                     rvAdapter = null;
                     clubAnnounTasks = new ArrayList<GetClubAnnounsTask>();
 
-                    if(Main.PROFILE.getClubs() != null){
-                        for(String clubId : Main.PROFILE.getClubs()){
+                    if (Main.PROFILE.getClubs() != null) {
+                        for (String clubId : Main.PROFILE.getClubs()) {
                             GetClubAnnounsTask announsTask = new GetClubAnnounsTask(clubId, this.getActivity(), this);
                             announsTask.execute();
                             clubAnnounTasks.add(announsTask);
@@ -424,23 +447,23 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
                         homeClubLoading.setVisibility(View.VISIBLE);
                     }
                 }
-            }else{
-                if(Main.PROFILE == null){
+            } else {
+                if (Main.PROFILE == null) {
                     main.refreshProfile();
-                }else{
+                } else {
                     setOffline();
                 }
             }
         }
     }
 
-    public void cancelTasks(boolean all){
-        if(task != null){
+    public void cancelTasks(boolean all) {
+        if (task != null) {
             task.cancel(false);
         }
 
-        if(all){
-            if(clubAnnounTasks != null && !clubAnnounTasks.isEmpty()) {
+        if (all) {
+            if (clubAnnounTasks != null && !clubAnnounTasks.isEmpty()) {
                 for (GetClubAnnounsTask announTask : clubAnnounTasks) {
                     announTask.cancel(true);
                 }
@@ -448,16 +471,16 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
         }
     }
 
-    public void setMain(Main main){
+    public void setMain(Main main) {
         this.main = main;
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
-        if(hidden){
+        if (hidden) {
             //cancelTasks(false);
             homeSwipeRefresh.setRefreshing(false);
-        }else{
+        } else {
            /* if(homeScrollView != null){
                 homeScrollView.postDelayed(new Runnable() {
                     @Override
@@ -472,10 +495,10 @@ public class HomeFragment extends Fragment implements ClubAnnounGetter {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-        if(Main.PROFILE != null && progressBar != null
-                && progressBar.getVisibility() == View.VISIBLE){
+        if (Main.PROFILE != null && progressBar != null
+                && progressBar.getVisibility() == View.VISIBLE) {
             refreshAnnouns();
         }
         onHiddenChanged(false);

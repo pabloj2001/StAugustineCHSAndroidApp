@@ -36,7 +36,6 @@ import java.util.Map;
 import ca.staugustinechs.staugustineapp.Activities.Main;
 
 public class AppUtils {
-
     public static String SONG_REQUEST_THEME;
     public static String ANDROID_VERSION;
     public static boolean APP_ONLINE, ALLOW_ACCOUNTS, SHOW_USERS_ON_SONGS;
@@ -51,14 +50,14 @@ public class AppUtils {
 
     public static boolean shouldGetFile(String imgName, Activity activity) {
         File file = activity.getFileStreamPath(imgName);
-        if(file.exists()){
+        if (file.exists()) {
             return false;
-        }else{
+        } else {
             return true;
         }
     }
 
-    public static void saveImg(Bitmap img, String imgName, long time, Activity activity){
+    public static void saveImg(Bitmap img, String imgName, long time, Activity activity) {
         try {
             FileOutputStream stream = activity.openFileOutput(imgName + "_" + time, Context.MODE_PRIVATE);
             img.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -72,16 +71,16 @@ public class AppUtils {
         }
     }
 
-    public static void deleteExtraImgs(String imgName, long time, Activity activity){
+    public static void deleteExtraImgs(String imgName, long time, Activity activity) {
         File dir = activity.getFileStreamPath(imgName);
-        for(File file : dir.getParentFile().listFiles()){
-            if(!file.getName().equals(imgName + "_" + time) && file.getName().contains(imgName)){
+        for (File file : dir.getParentFile().listFiles()) {
+            if (!file.getName().equals(imgName + "_" + time) && file.getName().contains(imgName)) {
                 file.delete();
             }
         }
     }
 
-    public static Bitmap getImg(String imgName, Activity activity){
+    public static Bitmap getImg(String imgName, Activity activity) {
         try {
             return BitmapFactory.decodeFile(activity.getFileStreamPath(imgName).getAbsolutePath());
         } catch (Exception e) {
@@ -91,11 +90,11 @@ public class AppUtils {
     }
 
     public static boolean isNetworkAvailable(Activity activity) {
-        if(activity != null){
+        if (activity != null) {
             ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
             return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        }else{
+        } else {
             return false;
         }
     }
@@ -105,12 +104,12 @@ public class AppUtils {
         return (int) Math.ceil(dp * density);
     }
 
-    public static int getDimen(int dimenId, Activity activity){
+    public static int getDimen(int dimenId, Activity activity) {
         return (int) activity.getResources().getDimension(dimenId);
     }
 
-    public static int getDeviceDimen(int dimen, Activity activity){
-        if(activity != null){
+    public static int getDeviceDimen(int dimen, Activity activity) {
+        if (activity != null) {
             float targetDp = 4f;
             float density = activity.getResources().getDisplayMetrics().density;
             return Math.round(AppUtils.getDimen(dimen, activity) * (density / targetDp));
@@ -120,20 +119,20 @@ public class AppUtils {
 
     public static boolean loadCalendarAdded(Activity activity) {
         Map<String, String> data = AppUtils.loadMapFile(Main.CALENDAR_ADDED, activity);
-        if(data != null){
+        if (data != null) {
             return Boolean.parseBoolean(data.get("CALENDAR_ADDED"));
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static void saveCalendarAdded(boolean calendarAdded, Activity activity){
+    public static void saveCalendarAdded(boolean calendarAdded, Activity activity) {
         Map<String, String> data = new HashMap<String, String>();
         data.put("CALENDAR_ADDED", calendarAdded + "");
         AppUtils.saveMapFile(Main.CALENDAR_ADDED, data, activity);
     }
 
-    public static String[] loadFile(String filePath, Activity activity){
+    public static String[] loadFile(String filePath, Activity activity) {
         File file = new File(activity.getFilesDir(), filePath);
         if (file.exists()) {
             FileInputStream is = null;
@@ -163,7 +162,7 @@ public class AppUtils {
         return null;
     }
 
-    public static Map<String, String> loadMapFile(String filePath, Activity activity){
+    public static Map<String, String> loadMapFile(String filePath, Activity activity) {
         File file = new File(activity.getFilesDir(), filePath);
         if (file.exists()) {
             FileInputStream is = null;
@@ -176,7 +175,7 @@ public class AppUtils {
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     String[] dataPiece = line.split(":");
-                    if(dataPiece.length > 1){
+                    if (dataPiece.length > 1) {
                         data.put(dataPiece[0], dataPiece[1]);
                     }
                 }
@@ -196,15 +195,15 @@ public class AppUtils {
         return null;
     }
 
-    public static void saveFile(String file, String[] data, Activity activity){
+    public static void saveFile(String file, String[] data, Activity activity) {
         FileOutputStream fos = null;
-        try{
+        try {
             fos = activity.openFileOutput(file, Context.MODE_PRIVATE);
 
             String combined = AppUtils.combineWithRegex(data);
 
             fos.write(combined.getBytes());
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
@@ -215,19 +214,19 @@ public class AppUtils {
         }
     }
 
-    public static boolean saveMapFile(String file, Map<String, String> data, Activity activity){
+    public static boolean saveMapFile(String file, Map<String, String> data, Activity activity) {
         FileOutputStream fos = null;
-        try{
+        try {
             fos = activity.openFileOutput(file, Context.MODE_PRIVATE);
 
             StringBuilder combined = new StringBuilder();
-            for(Map.Entry<String, String> piece : data.entrySet()){
+            for (Map.Entry<String, String> piece : data.entrySet()) {
                 combined.append(piece.getKey() + ":" + piece.getValue() + "\n");
             }
 
             fos.write(combined.toString().getBytes());
             return true;
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
         } finally {
@@ -239,9 +238,9 @@ public class AppUtils {
         }
     }
 
-    public static String combineWithRegex(String[] data){
+    public static String combineWithRegex(String[] data) {
         String combined = "";
-        for(String piece : data){
+        for (String piece : data) {
             combined += piece + ";";
         }
         combined = combined.substring(0, combined.length() - 1);
@@ -249,7 +248,7 @@ public class AppUtils {
         return combined;
     }
 
-    public static byte[] getImgBytes(Uri imgUri, int width, int height, Activity activity){
+    public static byte[] getImgBytes(Uri imgUri, int width, int height, Activity activity) {
         try {
             Bitmap img = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), imgUri);
             return getImgBytes(img, width, height, activity);
@@ -259,9 +258,9 @@ public class AppUtils {
         return null;
     }
 
-    public static byte[] getImgBytes(Bitmap img, int width, int height, Activity activity){
+    public static byte[] getImgBytes(Bitmap img, int width, int height, Activity activity) {
         try {
-            if(width <= 0 || height <= 0){
+            if (width <= 0 || height <= 0) {
                 width = 700;
                 height = (int) (((double) width / (double) img.getWidth()) * (double) img.getHeight());
             }
@@ -280,8 +279,8 @@ public class AppUtils {
     }
 
     public static void uploadImg(String imgName, byte[] imgBytes, String bucket,
-                                 final OnCompleteListener completeListener){
-        if(imgBytes != null){
+                                 final OnCompleteListener completeListener) {
+        if (imgBytes != null) {
             FirebaseStorage.getInstance().getReference()
                     .child(bucket + imgName)
                     .putBytes(imgBytes)
@@ -289,7 +288,7 @@ public class AppUtils {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> taskStorage) {
                             if (taskStorage.isSuccessful()) {
-                                if(completeListener != null){
+                                if (completeListener != null) {
                                     completeListener.onComplete(taskStorage);
                                 }
                             } else {
@@ -304,16 +303,16 @@ public class AppUtils {
         }
     }
 
-    public static String getRandomKey(int length){
+    public static String getRandomKey(int length) {
         StringBuilder key = new StringBuilder();
         //48 - 57, 65 - 90, 97 - 122
-        for(int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             int type = (int) Math.floor(Math.random() * 10);
-            if(type <= 4){
+            if (type <= 4) {
                 key.append((int) Math.floor(Math.random() * 9));
-            }else if(type <= 7){
+            } else if (type <= 7) {
                 key.append((char) (Math.floor(Math.random() * (90 - 65)) + 65));
-            }else{
+            } else {
                 key.append((char) (Math.floor(Math.random() * (122 - 97)) + 97));
             }
         }
@@ -383,10 +382,10 @@ public class AppUtils {
         }
     }
 
-    public static int longToInt(Long number){
-        if(Build.VERSION.SDK_INT > 23) {
+    public static int longToInt(Long number) {
+        if (Build.VERSION.SDK_INT > 23) {
             return Math.toIntExact(number);
-        }else{
+        } else {
             return (int) ((long) number);
         }
     }

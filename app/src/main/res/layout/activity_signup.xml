@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/suLayout">
 
-    <androidx.core.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/suPager">
@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    </androidx.core.view.ViewPager>
+    </androidx.viewpager.widget.ViewPager>
 
     <TextView
         android:layout_width="match_parent"
@@ -47,4 +47,4 @@
         android:paddingBottom="8dp"
         android:id="@+id/suNextBtn"/>
 
-</androidx.constraintlayout.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

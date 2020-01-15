@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import ca.staugustinechs.staugustineapp.Fragments.CafMenuFragment;
 import ca.staugustinechs.staugustineapp.Objects.CafMenuItem;
@@ -30,11 +31,32 @@ public class GetCafMenuTask extends AsyncTask<String, Void, List<CafMenuItem>> {
         Task<DocumentSnapshot> task = FirebaseFirestore.getInstance().collection("info")
                 .document(dailyMenu ? "cafMenu" : "cafMenuRegular").get();
 
-        while(!task.isComplete()){ }
+        Task<DocumentSnapshot> imageTask = FirebaseFirestore.getInstance().collection("info")
+                .document("cafMenuImages").get();
 
-        if(task.isSuccessful()){
-            List<CafMenuItem> items = new ArrayList<CafMenuItem>();
-            for(Map.Entry<String, Object> entry : task.getResult().getData().entrySet()){
+        while (!task.isComplete()) {
+        }
+
+        //while (!imageTask.isComplete()) {
+        //}
+
+        if (task.isSuccessful()) {// && imageTask.isSuccessful()) {
+            //Map<String, Object> cafImages = Objects.requireNonNull(imageTask.getResult()).getData();
+            String itemName;
+            List<CafMenuItem> items = new ArrayList<>();
+            for (Map.Entry<String, Object> entry : (Objects.requireNonNull(Objects.requireNonNull(task.getResult()).getData())).entrySet()) {
+                itemName = entry.getKey().trim();
+                //assert cafImages != null;
+                // boolean hasImage = cafImages.containsKey(itemName) &&
+                //       !((String) Objects.requireNonNull(cafImages.get(itemName))).equalsIgnoreCase("");
+                // String imgUrl = hasImage ?
+                //         ((String) cafImages.get(itemName)) : "https://i.kym-cdn.com/photos/images/original/001/067/012/a30.jpg_large";
+                //Bitmap img = null;
+                // try {
+                //     img = Picasso.get().load(imgUrl).resize(300, 400).rotate(90).centerCrop().get();
+                // } catch (IOException e) {
+                //   e.printStackTrace();
+                // }
                 //GO THROUGH EACH ENTRY PAIR (KEY: ITEM NAME, VALUE: PRICE)
                 //CREATE EACH CAF MENU ITEM AND SAVE THEM INTO THE ARRAY
                 items.add(new CafMenuItem(entry.getKey(),
@@ -48,10 +70,9 @@ public class GetCafMenuTask extends AsyncTask<String, Void, List<CafMenuItem>> {
 
     @Override
     protected void onPostExecute(List<CafMenuItem> items) {
-        if(!this.isCancelled()){
+        if (!this.isCancelled()) {
             //RETURN ITEMS TO CAF MENU FRAGMENT
             cafMenuFragment.updateMenu(items, dailyMenu);
         }
     }
-
 }
