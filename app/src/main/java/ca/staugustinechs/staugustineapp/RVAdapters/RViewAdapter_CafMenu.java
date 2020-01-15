@@ -3,7 +3,6 @@ package ca.staugustinechs.staugustineapp.RVAdapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,13 +22,13 @@ public class RViewAdapter_CafMenu extends RecyclerView.Adapter<RViewAdapter_CafM
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView cmItemName;
         TextView cmItemPrice;
-        ImageView cmImage;
+        //ImageView cmImage;
 
         public ViewHolder(View v) {
             super(v);
             cmItemName = (TextView) itemView.findViewById(R.id.cmItemName);
             cmItemPrice = (TextView) itemView.findViewById(R.id.cmItemPrice);
-            cmImage = itemView.findViewById(R.id.cmImage);
+            //cmImage = itemView.findViewById(R.id.cmImage);
         }
     }
 
@@ -56,7 +55,7 @@ public class RViewAdapter_CafMenu extends RecyclerView.Adapter<RViewAdapter_CafM
     @Override
     public void onBindViewHolder(final RViewAdapter_CafMenu.ViewHolder holder, final int position) {
         holder.cmItemName.setText(items.get(position).getName());
-        holder.cmImage.setImageBitmap(items.get(position).getImage());
+        //holder.cmImage.setImageBitmap(items.get(position).getImage());
 
         DecimalFormat format = new DecimalFormat("0.00");
         String strPrice = format.format(items.get(position).getPrice());

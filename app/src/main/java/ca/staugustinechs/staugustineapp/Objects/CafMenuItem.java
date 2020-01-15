@@ -1,17 +1,14 @@
 package ca.staugustinechs.staugustineapp.Objects;
 
-import android.graphics.Bitmap;
-
 public class CafMenuItem {
 
     private String name;
-    private Bitmap image;
+    //private Bitmap image;
     private double price;
 
-    public CafMenuItem(String name, double price, Bitmap img) {
+    public CafMenuItem(String name, double price) {
         this.name = name;
         this.price = price;
-        this.image = img;
     }
 
     public String getName() {
@@ -22,7 +19,7 @@ public class CafMenuItem {
         return price;
     }
 
-    public Bitmap getImage() {
-        return image;
-    }
+    //public Bitmap getImage() {
+    //  return image;
+    //}
 }

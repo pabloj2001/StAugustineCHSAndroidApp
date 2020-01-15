@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DateFormat;
@@ -60,7 +60,7 @@ public class CafMenuFragment extends Fragment {
         }else{
             cmDailyHeader.setText(today + " Menu");
             menu = view.findViewById(R.id.cmMenu);
-            menu.setLayoutManager(new GridLayoutManager(this.getContext(), 2) {
+            menu.setLayoutManager(new LinearLayoutManager(this.getContext()) {
                 @Override
                 public boolean canScrollVertically(){
                     return false;
@@ -71,7 +71,7 @@ public class CafMenuFragment extends Fragment {
             task.execute();
         }
 
-        menuRegular.setLayoutManager(new GridLayoutManager(this.getContext(), 2) {
+        menuRegular.setLayoutManager(new LinearLayoutManager(this.getContext()) {
             @Override
             public boolean canScrollVertically(){
                 return false;
