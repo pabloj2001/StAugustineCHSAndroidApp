@@ -10,8 +10,8 @@ android {
         applicationId "ca.staugustinechs.staugustineapp"
         minSdkVersion 23
         targetSdkVersion 29
-        versionName '1.05'
-        versionCode 13
+        versionName '1.15'
+        versionCode 16
     }
     buildTypes {
         release {
